@@ -5,6 +5,8 @@ import com.mo.entity.Auth;
 import com.mo.mapper.AuthMapper;
 import com.mo.model.Result;
 import com.mo.model.ResultCode;
+import com.mo.model.ResultPage;
+import com.mo.request.AuthListRequest;
 import com.mo.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -21,6 +23,14 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @PostMapping("/pageAuthList")
+    public ResultPage<AuthDTO> pageAuthList(@RequestBody AuthListRequest request) {
+
+        ResultPage<AuthDTO> pageResult = authService.pageAuthList(request);
+        return pageResult;
+
+    }
 
     @PostMapping("/query/id")
     public Result<AuthDTO> findByid(@RequestParam String id) {

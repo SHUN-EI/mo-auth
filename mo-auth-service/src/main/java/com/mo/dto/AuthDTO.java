@@ -47,7 +47,7 @@ public class AuthDTO {
     /**
      * 绑定手机的时间
      */
-    @JsonProperty("mobile_bindDate")
+    @JsonProperty("mobile_bind_date")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date mobileBindDate;
 
@@ -59,7 +59,7 @@ public class AuthDTO {
     /**
      * 绑定邮箱的时间
      */
-    @JsonProperty("email_bindDate")
+    @JsonProperty("email_bind_date")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date emailBindDate;
 
@@ -71,7 +71,7 @@ public class AuthDTO {
     /**
      * 绑定QQ的时间
      */
-    @JsonProperty("qq_bindDate")
+    @JsonProperty("qq_bind_date")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date qqBindDate;
 
@@ -84,7 +84,7 @@ public class AuthDTO {
      * 绑定微信的时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonProperty("weixin_bindDate")
+    @JsonProperty("weixin_bind_date")
     private Date weixinBindDate;
 
     /**
@@ -96,7 +96,7 @@ public class AuthDTO {
      * 绑定新浪微博的时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonProperty("weibo_bindDate")
+    @JsonProperty("weibo_bind_date")
     private Date weiboBindDate;
 
     /**
