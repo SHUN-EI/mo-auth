@@ -1,12 +1,18 @@
 package com.mo.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mo.validate.Mobile;
+import com.mo.validate.UserName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.checkerframework.common.value.qual.MinLen;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.Date;
 
 /**
@@ -19,12 +25,15 @@ public class AuthRequest {
     /**
      * 第几页
      */
+    @Min(value = 1, message = "页码数从1开始")
     @JsonProperty("page_num")
     @ApiModelProperty(value = "第几页", example = "1")
     private Integer pageNum;
     /**
      * 每页显示多少条
      */
+    @Min(value = 2, message = "每页最少显示5条数据")
+    @Max(value = 30, message = "每页最多显示30条数据")
     @JsonProperty("page_size")
     @ApiModelProperty(value = "每页显示多少条", example = "2")
     private Integer pageSize;
@@ -35,6 +44,7 @@ public class AuthRequest {
     /**
      * 用户账号
      */
+    @UserName
     @JsonProperty("user_name")
     @ApiModelProperty(value = "用户账号", example = "zhangsan")
     private String userName;
@@ -47,6 +57,7 @@ public class AuthRequest {
     /**
      * 账户状态，1正常，0测试，-1禁用
      */
+    @Range(min = -1, max = 1, message = "用户状态数据错误")
     @ApiModelProperty(value = "账户状态，1正常，0测试，-1禁用", example = "1")
     private Integer status;
 
@@ -54,6 +65,7 @@ public class AuthRequest {
     /**
      * 用户手机号
      */
+    @Mobile
     @ApiModelProperty(value = "用户手机号", example = "18866668888")
     private String mobile;
 
@@ -67,6 +79,7 @@ public class AuthRequest {
     /**
      * 绑定邮箱
      */
+    @Email
     @ApiModelProperty(value = "绑定邮箱", example = "zhangsan@itcast.cn")
     private String email;
 

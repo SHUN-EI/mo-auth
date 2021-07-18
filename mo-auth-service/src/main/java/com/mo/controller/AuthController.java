@@ -9,9 +9,11 @@ import com.mo.request.AuthRequest;
 import com.mo.service.AuthService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,7 +30,7 @@ public class AuthController {
 
     @ApiOperation("根据条件查询认证信息")
     @PostMapping("/query")
-    public Result<AuthDTO> query(@RequestBody AuthRequest request) {
+    public Result<AuthDTO> query(@ApiParam("用户认证信息请求对象") @Validated @RequestBody AuthRequest request) {
 
         Result<AuthDTO> authDTO = authService.query(request);
         return authDTO;
@@ -37,7 +39,7 @@ public class AuthController {
 
     @ApiOperation("根据条件分页查询认证信息")
     @PostMapping("/pageAuthList")
-    public ResultPage<AuthDTO> pageAuthList(@RequestBody AuthRequest request) {
+    public ResultPage<AuthDTO> pageAuthList(@ApiParam("用户认证信息请求对象") @Validated @RequestBody AuthRequest request) {
 
         ResultPage<AuthDTO> pageResult = authService.pageAuthList(request);
         return pageResult;
