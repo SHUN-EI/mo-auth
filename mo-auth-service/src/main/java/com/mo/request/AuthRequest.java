@@ -12,7 +12,7 @@ import java.util.Date;
  */
 @ApiModel(value = "用户认证信息对象", description = "用户认证信息请求对象")
 @Data
-public class AuthListRequest {
+public class AuthRequest {
 
     /**
      * 第几页

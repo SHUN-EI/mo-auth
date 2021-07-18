@@ -21,7 +21,8 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerConfiguration {
 
     /**
-     * C端-用户相关
+     * 认证服务平台-接口文档
+     * 访问地址: http://localhost:9001/swagger-ui/index.html#/
      *
      * @return
      */
