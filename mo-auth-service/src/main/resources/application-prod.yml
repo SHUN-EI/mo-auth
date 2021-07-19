@@ -12,6 +12,16 @@ spring:
     url: jdbc:mysql://39.108.182.26:3408/mo_auth?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: mo12345
+  redis:   #Redis
+    host: 39.108.182.26
+    port: 8000
+    password: mo12345
+    pool:
+      max-active: -1
+      max-wait: 30
+      max-idle: 30
+      min-idle: 5
+      timeout: 3000
 #配置plus打印sql日志
 mybatis-plus:
   configuration:

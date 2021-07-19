@@ -34,6 +34,10 @@ public class CaptchaController {
         String code = arithmeticCaptcha.text();
         //生成标识符，使用UUID作为key,key的作用是标识一个用户
         String key = UUID.randomUUID().toString();
+
+        //日志输出
+        log.debug("生成的验证码图片：key={},code={}", key, code);
+
         //封装返回结果数据
         Map map = new HashMap();
         map.put("key", key);
