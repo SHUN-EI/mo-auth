@@ -36,6 +36,7 @@
         <mybatisplus.boot.starter.version>3.4.0</mybatisplus.boot.starter.version>
         <springfox.boot.starter.version>3.0.0</springfox.boot.starter.version>
         <validation.version>2.5.2</validation.version>
+        <easy.captcha.version>1.6.2</easy.captcha.version>
 
         <!--跳过单元测试-->
         <skipTests>true</skipTests>
@@ -114,6 +115,13 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons.lang3.version}</version>
+            </dependency>
+
+            <!--图片验证码-->
+            <dependency>
+                <groupId>com.github.whvcse</groupId>
+                <artifactId>easy-captcha</artifactId>
+                <version>${easy.captcha.version}</version>
             </dependency>
 
         </dependencies>
