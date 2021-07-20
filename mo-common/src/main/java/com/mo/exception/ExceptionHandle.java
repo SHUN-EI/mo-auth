@@ -32,7 +32,7 @@ public class ExceptionHandle {
             BizException bizException = (BizException) e;
             log.info("[业务异常]{}", e);
             //返回前端的错误信息
-            return Result.error(bizException.getCode(), bizException.getMsg());
+            return Result.buildCodeAndMsg(bizException.getCode(), bizException.getMsg());
         } else if (e instanceof ConstraintViolationException) {
 
             //参数检验异常
@@ -41,7 +41,7 @@ public class ExceptionHandle {
             log.info("[参数检验异常]{}", e);
 
             //处理自定义参数校验异常，返回前端的校验错误提示信息
-            return Result.error(ResultCode.BAD_REQUEST, sb.toString());
+            return Result.buildCodeAndMsg(ResultCode.BAD_REQUEST, sb.toString());
         } else if (e instanceof MethodArgumentNotValidException) {
 
             //对象类型的参数校验异常
@@ -50,7 +50,7 @@ public class ExceptionHandle {
             log.info("[对象类型的参数检验异常]{}", e);
 
             //处理自定义对象类型的参数校验异常，返回前端的校验错误提示信息
-            return Result.error(ResultCode.BAD_REQUEST, sb.toString());
+            return Result.buildCodeAndMsg(ResultCode.BAD_REQUEST, sb.toString());
         } else {
             log.info("[系统异常]{}", e);
             return Result.error("全局异常，未知错误");

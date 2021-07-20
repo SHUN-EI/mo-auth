@@ -42,7 +42,7 @@ public class CaptchaController {
         String key = UUID.randomUUID().toString();
 
         //把验证码信息保存到缓存中,还需要设置有效时间
-        redisUtil.set(CacheKey.getCaptchaImage(key),code,CacheKey.captchaExpire);
+        redisUtil.set(CacheKey.getCaptchaImage(key), code, CacheKey.CAPTCHAEXPIRE);
 
         //日志输出
         log.debug("生成的验证码图片：key={},code={}", key, code);

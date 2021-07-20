@@ -1,5 +1,6 @@
 package com.mo.model;
 
+import com.mo.enums.BizCodeEnum;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -25,6 +26,21 @@ public class Result<T> {
      * 返回的数据
      */
     private T data;
+
+    /**
+     * 成功，传入操作信息
+     *
+     * @param msg
+     * @return
+     */
+    public static Result success(String msg) {
+
+        return Result.builder()
+                .code(ResultCode.OK)
+                .msg(msg)
+                .data(null)
+                .build();
+    }
 
     /**
      * 成功，传入操作信息、数据
@@ -74,18 +90,27 @@ public class Result<T> {
 
 
     /**
-     * 失败，传入状态码，描述信息
+     * 自定义状态码和提示信息
      *
      * @param code
      * @param msg
      * @return
      */
-    public static Result error(int code, String msg) {
+    public static Result buildCodeAndMsg(int code, String msg) {
         return Result.builder()
                 .code(code)
                 .msg(msg)
                 .build();
     }
 
+    /**
+     * 传入枚举，返回信息
+     *
+     * @param bizCodeEnum
+     * @return
+     */
+    public static Result buildResult(BizCodeEnum bizCodeEnum) {
+        return buildCodeAndMsg(bizCodeEnum.getCode(), bizCodeEnum.getMessage());
+    }
 
 }

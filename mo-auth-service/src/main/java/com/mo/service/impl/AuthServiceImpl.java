@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
             return Result.success("查询成功", authDTO);
 
         }
-        return Result.error(ResultCode.NOT_FOUND, "数据查询失败");
+        return Result.buildCodeAndMsg(ResultCode.NOT_FOUND, "数据查询失败");
     }
 
     /**
