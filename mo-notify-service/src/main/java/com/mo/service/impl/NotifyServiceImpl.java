@@ -4,6 +4,7 @@ import com.mo.constant.CacheKey;
 import com.mo.enums.BizCodeEnum;
 import com.mo.enums.SendCodeEnum;
 import com.mo.model.Result;
+import com.mo.service.MailService;
 import com.mo.service.NotifyService;
 import com.mo.utils.CheckUtil;
 import com.mo.utils.CommonUtil;
@@ -23,7 +24,20 @@ import java.util.concurrent.TimeUnit;
 public class NotifyServiceImpl implements NotifyService {
 
     @Autowired
+    private MailService mailService;
+    @Autowired
     private RedisUtil redisUtil;
+
+    /**
+     * 验证码的标题
+     */
+    private static final String SUBJECT = "Mo-auth的验证码";
+
+
+    /**
+     * 验证码的内容
+     */
+    private static final String CONTENT = "您的验证码是%s,有效时间是5分钟,打死都不要告诉别人哦";
 
     /**
      * 发送验证码
@@ -62,7 +76,7 @@ public class NotifyServiceImpl implements NotifyService {
 
         if (CheckUtil.isEmail(to)) {
             //发送邮箱验证码
-            //mailService.sendMail(to, SUBJECT, String.format(CONTENT, code));
+            mailService.sendMail(to, SUBJECT, String.format(CONTENT, code));
             return Result.success("验证码发送成功");
         } else if (CheckUtil.isPhone(to)) {
             //TODO 短信验证码

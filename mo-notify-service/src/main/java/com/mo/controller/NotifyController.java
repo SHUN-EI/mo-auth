@@ -83,9 +83,6 @@ public class NotifyController {
     @GetMapping("/getCaptchaCode")
     public void getCaptchaCode(HttpServletRequest request, HttpServletResponse response) {
 
-        //缓存的key,key的作用是标识一个用户
-        String key = getCaptchaKey(request);
-
 //        //这里使用算式验证码
 //        //生成验证码，创建验证码对象，使用算式验证码
 //        ArithmeticCaptcha arithmeticCaptcha = new ArithmeticCaptcha(180, 80);
@@ -96,7 +93,9 @@ public class NotifyController {
 
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
-            response.setContentType("image/gif");
+
+            //缓存的key,key的作用是标识一个用户
+            String key = getCaptchaKey(request);
 
             //gif动图-图片验证码
             GifCaptcha gifCaptcha = new GifCaptcha(150, 50);
@@ -104,7 +103,9 @@ public class NotifyController {
             gifCaptcha.setFont(Captcha.FONT_5);
 
             //把验证码信息保存到缓存中,还需要设置有效时间
-            redisUtil.set(CacheKey.getCaptchaImage(key), gifCaptcha.text(), CacheKey.CAPTCHAEXPIRE);
+            redisUtil.set(key, gifCaptcha.text(), CacheKey.CAPTCHAEXPIRE);
+
+            response.setContentType("image/gif");
             //图形验证码输出
             gifCaptcha.out(outputStream);
             log.info("生成的gif动图-图片验证码为:{}", gifCaptcha.text());
