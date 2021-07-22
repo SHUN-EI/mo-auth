@@ -79,9 +79,9 @@ public class NotifyController {
     /**
      * 获取图形验证码
      */
-    @ApiOperation("获取图形验证码")
-    @GetMapping("/getCaptchaCode")
-    public void getCaptchaCode(HttpServletRequest request, HttpServletResponse response) {
+    @ApiOperation("获取图形验证码-图像")
+    @GetMapping("/getCaptchaCodeImage")
+    public void getCaptchaCodeImage(HttpServletRequest request, HttpServletResponse response) {
 
 //        //这里使用算式验证码
 //        //生成验证码，创建验证码对象，使用算式验证码
@@ -115,6 +115,41 @@ public class NotifyController {
         }
 
 
+    }
+
+    @ApiOperation("获取图形验证码")
+    @GetMapping("/getCaptchaCode")
+    public Result getCaptchaCode(HttpServletRequest request) throws Exception {
+
+//        //生成验证码，创建验证码对象，使用算式验证码
+//        ArithmeticCaptcha arithmeticCaptcha = new ArithmeticCaptcha(180, 80);
+//        //设置算式验证码的位数，几个数计算
+//        arithmeticCaptcha.setLen(3);
+//        //获取验证码结果
+//        String code = arithmeticCaptcha.text();
+
+        //缓存的key,key的作用是标识一个用户
+        String key = getCaptchaKey(request);
+
+        //gif动图-图片验证码
+        GifCaptcha gifCaptcha = new GifCaptcha(150, 50);
+        //设置字体
+        gifCaptcha.setFont(Captcha.FONT_5);
+        String code = gifCaptcha.text();
+
+        //把验证码信息保存到缓存中,还需要设置有效时间
+        redisUtil.set(key, code, CacheKey.CAPTCHAEXPIRE);
+
+        //日志输出
+        log.info("生成的验证码图片：key={},code={} ", key, code);
+
+        //封装返回结果数据
+        Map map = new HashMap();
+        map.put("key", key);
+        //图片输出为base64编码
+        map.put("gifCaptcha", gifCaptcha.toBase64());
+        //返回Result
+        return Result.success("图片验证码创建成功", map);
     }
 
     /**

@@ -22,13 +22,13 @@ public class Auth implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // IdType.INPUT让我们手动输入ID
-    //@TableId(value = "id", type = IdType.INPUT)
-    //ASSIGN_ID会获取IdentifierGenerator接口的实现，使用其中的nextId()方法获取主键id
     /**
      * 用户认证信息主键ID
      */
-    @TableId(value = "id", type = IdType.INPUT)
+    // IdType.INPUT让我们手动输入ID
+    //@TableId(value = "id", type = IdType.INPUT)
+    //ASSIGN_ID会获取IdentifierGenerator接口的实现，使用其中的nextId()方法获取主键id
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private String id;
 
     /**

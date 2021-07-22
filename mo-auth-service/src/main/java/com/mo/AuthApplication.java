@@ -21,8 +21,4 @@ public class AuthApplication {
         SpringApplication.run(AuthApplication.class, args);
     }
 
-    @Bean
-    public IdWorker createIdWorker() {
-        return new IdWorker(1, 1);
-    }
 }

@@ -41,8 +41,6 @@ public class AuthServiceImpl implements AuthService {
     private AuthMapper authMapper;
     @Autowired
     private RedisUtil redisUtil;
-    @Autowired
-    private IdWorker idWorker;
 
     /**
      * 用户注册
@@ -59,9 +57,10 @@ public class AuthServiceImpl implements AuthService {
         log.debug("用户名注册：key={},code={}", key, request.getCode());
 
         //从redis中获取code
-        String cacheCode = redisUtil.get(CacheKey.getCaptchaImage(key));
+        String cacheCode = redisUtil.get(key);
+        String code = request.getCode();
         //判断用户传递的code验证码是否正确
-        if (!request.getCode().equals(cacheCode)) {
+        if (!code.equals(cacheCode)) {
             throw new BizException(BizCodeEnum.CODE_ERROR);
         }
 
@@ -73,14 +72,13 @@ public class AuthServiceImpl implements AuthService {
             throw new BizException(BizCodeEnum.USER_EXISTS);
         }
 
-        //获取主键id
-        String id = idWorker.nextId() + "";
+//        //获取主键id
+//        String id = idWorker.nextId() + "";
         //用户密码进行加密
         String password = MacUtil.makeHashPassword(request.getPassword());
 
         //保存注册信息
         Auth auth = Auth.builder()
-                .id(id)
                 .userName(request.getUserName())
                 .password(password)
                 .status(1)
@@ -89,7 +87,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         authMapper.insert(auth);
 
-        return Result.success("账户注册成功", auth);
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        return Result.success("账户注册成功", authDTO);
     }
 
     /**

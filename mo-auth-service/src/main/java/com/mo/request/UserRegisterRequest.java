@@ -1,6 +1,7 @@
 package com.mo.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,6 +16,7 @@ import java.util.Date;
 public class UserRegisterRequest {
 
     @ApiModelProperty(value = "用户账号", example = "zhangsan")
+    @JsonProperty("user_name")
     private String userName;
 
     @ApiModelProperty(value = "用户注册密码", example = "123456")
