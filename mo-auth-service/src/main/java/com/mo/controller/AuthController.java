@@ -8,10 +8,12 @@ import com.mo.model.ResultPage;
 import com.mo.request.AuthRequest;
 import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
+import com.mo.validate.ValidUserName;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -30,9 +32,9 @@ public class AuthController {
     private AuthService authService;
 
 
-    @ApiOperation("用户注册")
+    @ApiOperation("用户注册-用户名注册")
     @PostMapping("/registerByUserName")
-    public Result<AuthDTO> registerByUserName(@ApiParam(value = "用户注册请求对象") @RequestBody UserRegisterRequest request) {
+    public Result<AuthDTO> registerByUserName(@ApiParam(value = "用户注册请求对象", required = true) @Validated(ValidUserName.class) @RequestBody UserRegisterRequest request) {
 
         Result<AuthDTO> authDTO = authService.registerByUserName(request);
         return authDTO;
