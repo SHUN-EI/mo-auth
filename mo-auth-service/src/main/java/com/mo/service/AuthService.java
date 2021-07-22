@@ -18,4 +18,6 @@ public interface AuthService {
     Result<AuthDTO> query(AuthRequest request);
 
     Result<AuthDTO> registerByUserName(UserRegisterRequest request);
+
+    Result<AuthDTO> registerByEmail(UserRegisterRequest request);
 }

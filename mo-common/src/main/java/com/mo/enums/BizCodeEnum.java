@@ -26,6 +26,8 @@ public enum BizCodeEnum {
      * 用户相关
      */
     USER_EXISTS(230001, "用户名已存在"),
+    USER_EMAIL_EXISTS(230002, "用户邮箱已存在"),
+
 
     /**
      * 验证码

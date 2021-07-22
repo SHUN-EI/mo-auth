@@ -8,6 +8,7 @@ import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
 import com.mo.enums.BizCodeEnum;
+import com.mo.enums.SendCodeEnum;
 import com.mo.exception.BizException;
 import com.mo.mapper.AuthMapper;
 import com.mo.model.Result;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +46,59 @@ public class AuthServiceImpl implements AuthService {
     private RedisUtil redisUtil;
 
     /**
+     * 用户注册-邮箱注册
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public Result<AuthDTO> registerByEmail(UserRegisterRequest request) {
+
+        //获取电子邮箱
+        String email = request.getEmail();
+        log.info("邮箱注册:email={},code={}", email, request.getCode());
+
+        //邮箱验证码缓存key
+        String cachekey = String.format(CacheKey.CHECK_CODE_KEY, SendCodeEnum.USER_REGISTER, email);
+
+        //获取redis中的验证码
+        String cacheCode = redisUtil.get(cachekey);
+        //判断用户传递的code验证码是否正确
+        if (!request.getCode().equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //判断Email是否重复,邮箱应该是唯一的
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(request.getEmail() != null, "email", request.getEmail());
+
+        Integer result = authMapper.selectCount(wrapper);
+        if (result > 0) {
+            throw new BizException(BizCodeEnum.USER_EMAIL_EXISTS);
+        }
+
+        //用户密码进行加密
+        String password = MacUtil.makeHashPassword(request.getPassword());
+
+        //保存注册信息
+        Auth auth = Auth.builder()
+                .email(email)
+                .emailBindDate(new Date())
+                .password(password)
+                .status(1)
+                .createDate(new Date())
+                .lastDate(new Date())
+                .build();
+        authMapper.insert(auth);
+
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        return Result.success("账户注册成功", authDTO);
+
+    }
+
+    /**
      * 用户注册-用户名注册
      *
      * @param request
@@ -54,13 +110,12 @@ public class AuthServiceImpl implements AuthService {
 
         //获取图片验证码的key
         String key = request.getKey();
-        log.debug("用户名注册：key={},code={}", key, request.getCode());
+        log.info("用户名注册：key={},code={}", key, request.getCode());
 
         //从redis中获取code
         String cacheCode = redisUtil.get(key);
-        String code = request.getCode();
         //判断用户传递的code验证码是否正确
-        if (!code.equals(cacheCode)) {
+        if (!request.getCode().equals(cacheCode)) {
             throw new BizException(BizCodeEnum.CODE_ERROR);
         }
 
