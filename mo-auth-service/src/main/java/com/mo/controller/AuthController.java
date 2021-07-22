@@ -31,10 +31,10 @@ public class AuthController {
 
 
     @ApiOperation("用户注册")
-    @PostMapping("/register")
-    public Result<AuthDTO> register(@ApiParam(value = "用户注册请求对象") @RequestBody UserRegisterRequest request) {
+    @PostMapping("/registerByUserName")
+    public Result<AuthDTO> registerByUserName(@ApiParam(value = "用户注册请求对象") @RequestBody UserRegisterRequest request) {
 
-        Result<AuthDTO> authDTO = authService.register(request);
+        Result<AuthDTO> authDTO = authService.registerByUserName(request);
         return authDTO;
     }
 

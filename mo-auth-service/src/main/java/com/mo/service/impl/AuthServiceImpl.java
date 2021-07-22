@@ -43,14 +43,14 @@ public class AuthServiceImpl implements AuthService {
     private RedisUtil redisUtil;
 
     /**
-     * 用户注册
+     * 用户注册-用户名注册
      *
      * @param request
      * @return
      */
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
-    public Result<AuthDTO> register(UserRegisterRequest request) {
+    public Result<AuthDTO> registerByUserName(UserRegisterRequest request) {
 
         //获取图片验证码的key
         String key = request.getKey();

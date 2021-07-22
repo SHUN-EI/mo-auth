@@ -2,10 +2,14 @@ package com.mo.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mo.validate.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 /**
@@ -15,17 +19,25 @@ import java.util.Date;
 @Data
 public class UserRegisterRequest {
 
-    @ApiModelProperty(value = "用户账号", example = "zhangsan")
     @JsonProperty("user_name")
+    @ApiModelProperty(value = "用户账号", example = "zhangsan")
+    @NotBlank(message = "用户账号不能为空", groups = {ValidUserName.class})
+    @UserName(groups = ValidUserName.class)
     private String userName;
 
+    //@JsonIgnore 的作用 转换为Json数据的时候，忽略密码
+    //@JsonIgnore//在接受数据的时候，不能使用注解，否则数据会转换丢失
     @ApiModelProperty(value = "用户注册密码", example = "123456")
+    @NotBlank(message = "用户密码不能为空")
+    @Length(min = 6, max = 20, message = "密码长度最少6位，最多20位")
     private String password;
 
     @ApiModelProperty(value = "账户状态，1正常，0测试，-1禁用", example = "1")
     private Integer status;
 
     @ApiModelProperty(value = "用户手机号", example = "18866668888")
+    @NotBlank(message = "手机号不能为空", groups = {ValidMobile.class})
+    @Mobile(groups = {ValidMobile.class})
     private String mobile;
 
     //设置时间格式
@@ -34,6 +46,8 @@ public class UserRegisterRequest {
     private Date mobileBindDate;
 
     @ApiModelProperty(value = "绑定邮箱", example = "zhangsan@itcast.cn")
+    @NotBlank(message = "邮箱不能为空", groups = {ValidEmail.class})
+    @Email(groups = {ValidEmail.class})
     private String email;
 
     @ApiModelProperty(value = "绑定邮箱的时间", example = "2020-01-01 12:30:30")
@@ -85,8 +99,10 @@ public class UserRegisterRequest {
     private String oldPassword;
 
     @ApiModelProperty(value = "图片验证码的key")
+    @NotBlank(message = "用户账号key不能为空", groups = {ValidUserName.class})
     private String key;
 
     @ApiModelProperty(value = "验证码code")
+    @NotBlank(message = "用户账号code不能为空", groups = {ValidUserName.class})
     private String code;
 }
