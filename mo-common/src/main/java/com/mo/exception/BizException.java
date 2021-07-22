@@ -1,5 +1,6 @@
 package com.mo.exception;
 
+import com.mo.enums.BizCodeEnum;
 import lombok.Data;
 
 /**
@@ -22,5 +23,11 @@ public class BizException extends RuntimeException {
         super(msg);
         this.code = code;
         this.msg = msg;
+    }
+
+    public BizException(BizCodeEnum bizCodeEnum) {
+        super(bizCodeEnum.getMessage());
+        this.code = bizCodeEnum.getCode();
+        this.msg = bizCodeEnum.getMessage();
     }
 }

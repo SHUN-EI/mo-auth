@@ -6,6 +6,7 @@ import com.mo.entity.Auth;
 import com.mo.model.Result;
 import com.mo.model.ResultPage;
 import com.mo.request.AuthRequest;
+import com.mo.request.UserRegisterRequest;
 
 /**
  * Created by mo on 2021/7/15
@@ -15,4 +16,6 @@ public interface AuthService {
     ResultPage<AuthDTO> pageAuthList(AuthRequest request);
 
     Result<AuthDTO> query(AuthRequest request);
+
+    Result<AuthDTO> register(UserRegisterRequest request);
 }

@@ -23,6 +23,11 @@ public enum BizCodeEnum {
     CART_ITEM_LOCK_FAIL(220002, "购物车商品项目锁定失败"),
 
     /**
+     * 用户相关
+     */
+    USER_EXISTS(230001, "用户名已存在"),
+
+    /**
      * 验证码
      */
     CODE_TO_ERROR(240001, "接收号码不合规"),
@@ -78,19 +83,19 @@ public enum BizCodeEnum {
     /**
      * 支付
      */
-    PAY_ORDER_FAIL(300001,"创建支付订单失败"),
-    PAY_ORDER_CALLBACK_SIGN_FAIL(300002,"支付订单回调验证签失败"),
-    PAY_ORDER_CALLBACK_NOT_SUCCESS(300003,"回调更新支付订单失败"),
-    PAY_ORDER_NOT_EXIST(300005,"订单不存在"),
-    PAY_ORDER_STATE_ERROR(300006,"订单状态不正常"),
-    PAY_ORDER_PAY_TIMEOUT(300007,"订单支付超时"),
+    PAY_ORDER_FAIL(300001, "创建支付订单失败"),
+    PAY_ORDER_CALLBACK_SIGN_FAIL(300002, "支付订单回调验证签失败"),
+    PAY_ORDER_CALLBACK_NOT_SUCCESS(300003, "回调更新支付订单失败"),
+    PAY_ORDER_NOT_EXIST(300005, "订单不存在"),
+    PAY_ORDER_STATE_ERROR(300006, "订单状态不正常"),
+    PAY_ORDER_PAY_TIMEOUT(300007, "订单支付超时"),
 
     /**
      * 流控操作
      */
-    CONTROL_FLOW(500101,"限流控制"),
-    CONTROL_DEGRADE(500201,"降级控制"),
-    CONTROL_AUTH(500301,"认证控制"),
+    CONTROL_FLOW(500101, "限流控制"),
+    CONTROL_DEGRADE(500201, "降级控制"),
+    CONTROL_AUTH(500301, "认证控制"),
 
 
     /**

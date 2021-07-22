@@ -80,6 +80,8 @@ public class NotifyServiceImpl implements NotifyService {
             return Result.success("验证码发送成功");
         } else if (CheckUtil.isPhone(to)) {
             //TODO 短信验证码
+
+            //如果小于60秒，则不给重复发送，24小时内手机验证码只能发6次
         }
 
         return Result.buildResult(BizCodeEnum.CODE_TO_ERROR);

@@ -6,6 +6,7 @@ import com.mo.model.Result;
 import com.mo.model.ResultCode;
 import com.mo.model.ResultPage;
 import com.mo.request.AuthRequest;
+import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +28,15 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+
+    @ApiOperation("用户注册")
+    @PostMapping("/register")
+    public Result<AuthDTO> register(@ApiParam(value = "用户注册请求对象") @RequestBody UserRegisterRequest request) {
+
+        Result<AuthDTO> authDTO = authService.register(request);
+        return authDTO;
+    }
 
     @ApiOperation("根据条件查询认证信息")
     @PostMapping("/query")

@@ -4,29 +4,93 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
+import com.mo.enums.BizCodeEnum;
+import com.mo.exception.BizException;
 import com.mo.mapper.AuthMapper;
 import com.mo.model.Result;
 import com.mo.model.ResultCode;
 import com.mo.model.ResultPage;
 import com.mo.request.AuthRequest;
+import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
+import com.mo.utils.IdWorker;
+import com.mo.utils.MacUtil;
+import com.mo.utils.RedisUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Created by mo on 2021/7/15
  */
+@Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private AuthMapper authMapper;
+    @Autowired
+    private RedisUtil redisUtil;
+    @Autowired
+    private IdWorker idWorker;
+
+    /**
+     * 用户注册
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result<AuthDTO> register(UserRegisterRequest request) {
+
+        //获取图片验证码的key
+        String key = request.getKey();
+        log.debug("用户名注册：key={},code={}", key, request.getCode());
+
+        //从redis中获取code
+        String cacheCode = redisUtil.get(CacheKey.getCaptchaImage(key));
+        //判断用户传递的code验证码是否正确
+        if (!request.getCode().equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //判断用户是否重复，用户名应该是唯一的
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(request.getUserName() != null, "user_name", request.getUserName());
+        Integer result = authMapper.selectCount(wrapper);
+        if (result > 0) {
+            throw new BizException(BizCodeEnum.USER_EXISTS);
+        }
+
+        //获取主键id
+        String id = idWorker.nextId() + "";
+        //用户密码进行加密
+        String password = MacUtil.makeHashPassword(request.getPassword());
+
+        //保存注册信息
+        Auth auth = Auth.builder()
+                .id(id)
+                .userName(request.getUserName())
+                .password(password)
+                .status(1)
+                .createDate(new Date())
+                .lastDate(new Date())
+                .build();
+        authMapper.insert(auth);
+
+        return Result.success("账户注册成功", auth);
+    }
 
     /**
      * 根据条件查询认证信息
