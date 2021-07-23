@@ -20,4 +20,6 @@ public interface AuthService {
     Result<AuthDTO> registerByUserName(UserRegisterRequest request);
 
     Result<AuthDTO> registerByEmail(UserRegisterRequest request);
+
+    Result<AuthDTO> registerByMobile(UserRegisterRequest request);
 }

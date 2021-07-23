@@ -9,6 +9,7 @@ import com.mo.request.AuthRequest;
 import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
 import com.mo.validate.ValidEmail;
+import com.mo.validate.ValidMobile;
 import com.mo.validate.ValidUserName;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,8 +33,19 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+
+    @ApiOperation("用户注册-手机号注册")
+    @PostMapping("/registerByMobile")
+    public Result<AuthDTO> registerByMobile(@ApiParam(value = "用户注册请求对象", required = true)
+                                            @Validated(ValidMobile.class)
+                                            @RequestBody UserRegisterRequest request) {
+
+        Result<AuthDTO> authDTO = authService.registerByMobile(request);
+        return authDTO;
+    }
+
     @ApiOperation("用户注册-邮箱注册")
-    @PostMapping("registerByEmail")
+    @PostMapping("/registerByEmail")
     public Result<AuthDTO> registerByEmail(@ApiParam(value = "用户注册请求对象", required = true)
                                            @Validated(ValidEmail.class)
                                            @RequestBody UserRegisterRequest request) {

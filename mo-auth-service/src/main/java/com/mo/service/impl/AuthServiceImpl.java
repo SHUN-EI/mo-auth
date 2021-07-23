@@ -1,5 +1,6 @@
 package com.mo.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,7 +21,9 @@ import com.mo.service.AuthService;
 import com.mo.utils.IdWorker;
 import com.mo.utils.MacUtil;
 import com.mo.utils.RedisUtil;
+import com.mo.validate.Mobile;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,62 @@ public class AuthServiceImpl implements AuthService {
     private AuthMapper authMapper;
     @Autowired
     private RedisUtil redisUtil;
+
+    /**
+     * 用户注册-手机号注册
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public Result<AuthDTO> registerByMobile(UserRegisterRequest request) {
+
+        //获取手机号
+        String mobile = request.getMobile();
+        log.info("手机号注册,mobile={},code={}", mobile, request.getCode());
+
+        //手机号验证码缓存key
+        String cachekey = String.format(CacheKey.CHECK_CODE_KEY, SendCodeEnum.USER_REGISTER, mobile);
+
+        //获取redis中的验证码
+        String cacheCode = redisUtil.get(cachekey);
+        //判断用户传递的code验证码是否正确
+        if (!request.getCode().equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //判断手机号是否重复,手机号应该是唯一的
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(request.getMobile() != null, "mobile", request.getMobile());
+
+        Integer result = authMapper.selectCount(wrapper);
+        if (result > 0) {
+            throw new BizException(BizCodeEnum.USER_MOBILE_EXISTS);
+        }
+
+        //保存注册信息
+        Auth auth = Auth.builder()
+                .mobile(request.getMobile())
+                .mobileBindDate(new Date())
+                .status(1)
+                .createDate(new Date())
+                .lastDate(new Date())
+                .build();
+
+        //手机号注册，可以使用密码，也可以不使用密码
+        //如果有密码，则进行密码加密
+        if (StringUtils.isNotBlank(request.getPassword())) {
+            String password = MacUtil.makeHashPassword(request.getPassword());
+            auth.setPassword(password);
+        }
+
+        authMapper.insert(auth);
+
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        return Result.success("账户注册成功", authDTO);
+    }
 
     /**
      * 用户注册-邮箱注册

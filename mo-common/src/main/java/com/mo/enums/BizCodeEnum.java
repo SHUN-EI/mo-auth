@@ -27,6 +27,7 @@ public enum BizCodeEnum {
      */
     USER_EXISTS(230001, "用户名已存在"),
     USER_EMAIL_EXISTS(230002, "用户邮箱已存在"),
+    USER_MOBILE_EXISTS(230003, "用户手机号已存在"),
 
 
     /**
