@@ -6,6 +6,7 @@ import com.mo.model.Result;
 import com.mo.model.ResultCode;
 import com.mo.model.ResultPage;
 import com.mo.request.AuthRequest;
+import com.mo.request.UserLoginRequest;
 import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
 import com.mo.validate.ValidEmail;
@@ -32,6 +33,19 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+
+    @ApiOperation("用户登录")
+    @PostMapping("/login")
+    public Result<AuthDTO> login(
+            @ApiParam(value = "用户登录请求对象", required = true)
+            @Validated
+            @RequestBody UserLoginRequest request) {
+
+        Result<AuthDTO> authDTO = authService.login(request);
+        return authDTO;
+
+    }
 
 
     @ApiOperation("用户注册-手机号注册")

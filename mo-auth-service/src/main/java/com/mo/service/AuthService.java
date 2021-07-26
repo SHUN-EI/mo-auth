@@ -6,6 +6,7 @@ import com.mo.entity.Auth;
 import com.mo.model.Result;
 import com.mo.model.ResultPage;
 import com.mo.request.AuthRequest;
+import com.mo.request.UserLoginRequest;
 import com.mo.request.UserRegisterRequest;
 
 /**
@@ -22,4 +23,6 @@ public interface AuthService {
     Result<AuthDTO> registerByEmail(UserRegisterRequest request);
 
     Result<AuthDTO> registerByMobile(UserRegisterRequest request);
+
+    Result<AuthDTO> login(UserLoginRequest request);
 }

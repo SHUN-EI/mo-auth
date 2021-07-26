@@ -45,6 +45,7 @@ public enum BizCodeEnum {
     ACCOUNT_UNREGISTER(250002, "账号不存在"),
     ACCOUNT_PWD_ERROR(250003, "账号或者密码错误"),
     ACCOUNT_UNLOGIN(250004, "账号未登录"),
+    ACCOUNT_FORBIDDEN(250005, "账号已禁用"),
 
     /**
      * 商品

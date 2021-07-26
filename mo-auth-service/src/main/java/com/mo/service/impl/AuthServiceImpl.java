@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
+import com.mo.enums.AccountStatus;
+import com.mo.enums.AuthType;
 import com.mo.enums.BizCodeEnum;
 import com.mo.enums.SendCodeEnum;
 import com.mo.exception.BizException;
@@ -16,12 +18,14 @@ import com.mo.model.Result;
 import com.mo.model.ResultCode;
 import com.mo.model.ResultPage;
 import com.mo.request.AuthRequest;
+import com.mo.request.UserLoginRequest;
 import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
 import com.mo.utils.IdWorker;
 import com.mo.utils.MacUtil;
 import com.mo.utils.RedisUtil;
 import com.mo.validate.Mobile;
+import com.mo.validate.ValidateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -48,12 +52,82 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private RedisUtil redisUtil;
 
+
+    /**
+     * 用户登录
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result<AuthDTO> login(UserLoginRequest request) {
+
+        //获取图片验证码
+        String key = request.getKey();
+        String code = request.getCode();
+
+        //判断图片验证码是否正确
+        String cacheCode = redisUtil.get(key);
+        if (!code.equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //判断登录类型
+        String input = request.getInput();
+        AuthType authType = ValidateUtil.chechLogin(input);
+
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+
+        //根据登录类型，分别进行用户认证信息的查询
+        Auth auth;
+        switch (authType) {
+            case MOBILE:
+                wrapper.eq(input != null, "mobile", input);
+                auth = authMapper.selectOne(wrapper);
+                break;
+            case USERNAME:
+                wrapper.eq(input != null, "user_name", input);
+                auth = authMapper.selectOne(wrapper);
+                break;
+            default:
+                wrapper.eq(input != null, "email", input);
+                auth = authMapper.selectOne(wrapper);
+                break;
+        }
+
+        //账户不存在
+        if (null == auth) {
+            throw new BizException(BizCodeEnum.ACCOUNT_UNREGISTER);
+        }
+
+        //如果账户不为空，进行密码校验
+        String password = MacUtil.makeHashPassword(request.getPassword());
+        if (!password.equals(auth.getPassword())) {
+            throw new BizException(BizCodeEnum.ACCOUNT_PWD_ERROR);
+        }
+
+        //校验账户的状态
+        if (AccountStatus.FORBIDDEN.getStatus() == auth.getStatus()) {
+            throw new BizException(BizCodeEnum.ACCOUNT_FORBIDDEN);
+        }
+
+        //更新最后一次登录时间
+        authMapper.updateLastDate(auth.getId());
+
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        return Result.success("账户登录成功", authDTO);
+    }
+
     /**
      * 用户注册-手机号注册
      *
      * @param request
      * @return
      */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public Result<AuthDTO> registerByMobile(UserRegisterRequest request) {
 
@@ -110,6 +184,7 @@ public class AuthServiceImpl implements AuthService {
      * @param request
      * @return
      */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public Result<AuthDTO> registerByEmail(UserRegisterRequest request) {
 
@@ -282,4 +357,5 @@ public class AuthServiceImpl implements AuthService {
         return ResultPage.success(resultPage.getTotal(), resultPage.getPages(),
                 request.getPageSize(), request.getPageNum(), authDTOList);
     }
+
 }
