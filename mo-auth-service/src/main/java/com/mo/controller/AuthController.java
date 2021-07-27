@@ -16,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.guieffect.qual.PolyUIEffect;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,17 @@ public class AuthController {
     private AuthService authService;
 
 
-    @ApiOperation("用户登录")
+    @ApiOperation("用户登录-手机验证码登录")
+    @PostMapping("/loginByMobile")
+    public Result<AuthDTO> loginByMobile(@ApiParam(value = "用户登录请求对象", required = true)
+                                         @Validated
+                                         @RequestBody UserLoginRequest request) {
+        Result<AuthDTO> authDTO = authService.loginByMobile(request);
+        return authDTO;
+
+    }
+
+    @ApiOperation("用户登录-用户账户密码登录")
     @PostMapping("/login")
     public Result<AuthDTO> login(
             @ApiParam(value = "用户登录请求对象", required = true)

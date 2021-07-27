@@ -54,7 +54,50 @@ public class AuthServiceImpl implements AuthService {
 
 
     /**
-     * 用户登录
+     * 用户登录-手机验证码登录
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public Result<AuthDTO> loginByMobile(UserLoginRequest request) {
+
+        //手机号获取
+        String mobile = request.getMobile();
+
+        //手机号验证码缓存key
+        String cachekey = String.format(CacheKey.CHECK_CODE_KEY, SendCodeEnum.USER_REGISTER, mobile);
+
+        //校验验证码
+        String cacheCode = redisUtil.get(cachekey);
+        if (!request.getCode().equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //根据手机号查询用户
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(request.getMobile() != null, "mobile", request.getMobile());
+        Auth auth = authMapper.selectOne(wrapper);
+
+        //如果用户查询不到结果，说明手机号未注册
+        if (null == auth) {
+            //执行注册操作
+            UserRegisterRequest registerRequest = new UserRegisterRequest();
+            BeanUtils.copyProperties(request, registerRequest);
+            return registerByMobile(registerRequest);
+        }
+
+        //更新最后一次登录时间
+        authMapper.updateLastDate(auth.getId());
+
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        return Result.success("账户登录成功", authDTO);
+    }
+
+    /**
+     * 用户登录-用户账户密码登录
      *
      * @param request
      * @return

@@ -25,4 +25,6 @@ public interface AuthService {
     Result<AuthDTO> registerByMobile(UserRegisterRequest request);
 
     Result<AuthDTO> login(UserLoginRequest request);
+
+    Result<AuthDTO> loginByMobile(UserLoginRequest request);
 }
