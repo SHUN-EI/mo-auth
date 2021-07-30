@@ -38,6 +38,7 @@
         <springfox.boot.starter.version>3.0.0</springfox.boot.starter.version>
         <validation.version>2.5.2</validation.version>
         <easy.captcha.version>1.6.2</easy.captcha.version>
+        <jwt.version>0.9.1</jwt.version>
 
         <!--跳过单元测试-->
         <skipTests>true</skipTests>
@@ -123,6 +124,13 @@
                 <groupId>com.github.whvcse</groupId>
                 <artifactId>easy-captcha</artifactId>
                 <version>${easy.captcha.version}</version>
+            </dependency>
+
+            <!-- JWT相关 -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jwt.version}</version>
             </dependency>
 
         </dependencies>
