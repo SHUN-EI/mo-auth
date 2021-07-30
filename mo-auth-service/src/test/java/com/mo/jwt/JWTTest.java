@@ -1,6 +1,7 @@
 package com.mo.jwt;
 
 import com.mo.AuthApplication;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -24,6 +25,24 @@ public class JWTTest {
 
     //声明盐，不能泄露，存放在服务器
     private static String secret = "TQB^Ipw7KxMPj2nPx0FbRD%$M";
+
+    @Test
+    public void parserJWTTest() {
+        String jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJtby1hdXRoIn0.9_6Xmq_yg6q4d7g78rjm5FxqApUKirVo4iIVwxJ2eeA";
+
+        //生成签名的key,使用java自带的Base64加密
+        byte[] encodeKey = Base64.getEncoder().encode(secret.getBytes());
+        SecretKey secretKey = new SecretKeySpec(encodeKey, 0, encodeKey.length, "AES");
+
+        //解析jwt
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(jwt)
+                .getBody();
+
+        log.info("jwt token的 id 为:{}", claims.getId());
+
+    }
 
     @Test
     public void createJWTTest() {
