@@ -22,6 +22,7 @@ import com.mo.request.UserLoginRequest;
 import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
 import com.mo.utils.IdWorker;
+import com.mo.utils.JWTUtil;
 import com.mo.utils.MacUtil;
 import com.mo.utils.RedisUtil;
 import com.mo.validate.Mobile;
@@ -93,6 +94,9 @@ public class AuthServiceImpl implements AuthService {
         AuthDTO authDTO = new AuthDTO();
         BeanUtils.copyProperties(auth, authDTO);
 
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
+
         return Result.success("账户登录成功", authDTO);
     }
 
@@ -161,6 +165,9 @@ public class AuthServiceImpl implements AuthService {
         AuthDTO authDTO = new AuthDTO();
         BeanUtils.copyProperties(auth, authDTO);
 
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
+
         return Result.success("账户登录成功", authDTO);
     }
 
@@ -218,6 +225,9 @@ public class AuthServiceImpl implements AuthService {
         AuthDTO authDTO = new AuthDTO();
         BeanUtils.copyProperties(auth, authDTO);
 
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
+
         return Result.success("账户注册成功", authDTO);
     }
 
@@ -271,6 +281,9 @@ public class AuthServiceImpl implements AuthService {
         AuthDTO authDTO = new AuthDTO();
         BeanUtils.copyProperties(auth, authDTO);
 
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
+
         return Result.success("账户注册成功", authDTO);
 
     }
@@ -321,6 +334,9 @@ public class AuthServiceImpl implements AuthService {
 
         AuthDTO authDTO = new AuthDTO();
         BeanUtils.copyProperties(auth, authDTO);
+
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
 
         return Result.success("账户注册成功", authDTO);
     }

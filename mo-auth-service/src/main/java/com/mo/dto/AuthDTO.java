@@ -113,4 +113,9 @@ public class AuthDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonProperty("last_date")
     private Date lastDate;
+
+    /**
+     * 用户token
+     */
+    private String token;
 }
