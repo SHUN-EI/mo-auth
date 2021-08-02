@@ -1,4 +1,4 @@
-package com.mo.captcha;
+package com.mo.redis;
 
 import com.mo.AuthApplication;
 import com.mo.utils.RedisUtil;
