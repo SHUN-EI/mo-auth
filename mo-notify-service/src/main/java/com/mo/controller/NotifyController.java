@@ -146,6 +146,7 @@ public class NotifyController {
         //封装返回结果数据
         Map map = new HashMap();
         map.put("key", key);
+        map.put("code", code);
         //图片输出为base64编码
         map.put("gifCaptcha", gifCaptcha.toBase64());
         //返回Result

@@ -34,3 +34,15 @@ logging:
     root: INFO
     #nacos日志问题
     com.alibaba.nacos.client.config.impl: WARN
+jwt:
+  secret: moauthsecret #jwt校验密钥
+  #鉴权排除的接口，如果已登录，所有接口都可以获取到认证信息主键
+  excludedUrls:
+    - /api/notify/*/sendCode
+    - /api/notify/*/getCaptchaCodeImage
+    - /api/notify/*/getCaptchaCode
+    - /api/auth/*/loginByMobile
+    - /api/auth/*/login
+    - /api/auth/*/registerByMobile
+    - /api/auth/*/registerByEmail
+    - /api/auth/*/registerByUserName

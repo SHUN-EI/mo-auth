@@ -12,7 +12,7 @@ import java.util.Base64;
 public class MacUtil {
 
     //声明用于生成密文的密钥，密钥可以自行修改
-    private final static String USER_SECRET = "vN3kTDRmbz&9YA!*";
+    private final static String USER_SECRET = "vNokTDRmbz&3YA!*";
     //设置加密算法
     private final static String HASH_TYPE = "HmacSHA256";
 

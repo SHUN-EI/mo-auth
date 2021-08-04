@@ -36,7 +36,7 @@ public class JWTUtil {
     /**
      * 加密的密钥
      */
-    private static final String SECRET = "TQB^Ipw7KxMPj2nPx0FbRD%$M";
+    private static final String SECRET = "moauthsecret";
 
     /**
      * 根据用户信息，生成token令牌
@@ -63,12 +63,13 @@ public class JWTUtil {
 
         //构建JWT token
         String token = Jwts.builder()
+                .setSubject(SUBJECT)
                 .setHeaderParam("typ", "JWT")
                 .setHeaderParam("alg", "HS256")
                 .setIssuedAt(Date.from(zdt.toInstant()))//签发时间
                 .setExpiration(Date.from(zdtEnd.toInstant()))//过期时间
                 .claim("authId", authId)
-                .signWith(SignatureAlgorithm.ES256, key)
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
 
 
