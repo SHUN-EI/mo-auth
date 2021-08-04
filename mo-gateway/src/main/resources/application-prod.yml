@@ -38,11 +38,11 @@ jwt:
   secret: moauthsecret #jwt校验密钥
   #鉴权排除的接口，如果已登录，所有接口都可以获取到认证信息主键
   excludedUrls:
-    - /api/notify/*/sendCode
-    - /api/notify/*/getCaptchaCodeImage
-    - /api/notify/*/getCaptchaCode
-    - /api/auth/*/loginByMobile
-    - /api/auth/*/login
-    - /api/auth/*/registerByMobile
-    - /api/auth/*/registerByEmail
-    - /api/auth/*/registerByUserName
+    - /api/notify/v1/sendCode
+    - /api/notify/v1/getCaptchaCodeImage
+    - /api/notify/v1/getCaptchaCode
+    - /api/auth/v1/loginByMobile
+    - /api/auth/v1/login
+    - /api/auth/v1/registerByMobile
+    - /api/auth/v1/registerByEmail
+    - /api/auth/v1/registerByUserName
