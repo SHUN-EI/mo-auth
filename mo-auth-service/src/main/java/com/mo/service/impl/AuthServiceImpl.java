@@ -5,13 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mo.aop.LoginRec;
 import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
-import com.mo.enums.AccountStatus;
-import com.mo.enums.AuthType;
-import com.mo.enums.BizCodeEnum;
-import com.mo.enums.SendCodeEnum;
+import com.mo.enums.*;
 import com.mo.exception.BizException;
 import com.mo.mapper.AuthMapper;
 import com.mo.model.Result;
@@ -60,6 +58,7 @@ public class AuthServiceImpl implements AuthService {
      * @param request
      * @return
      */
+    @LoginRec(status = LoginStatus.IN,note = "手机验证码登录")
     @Override
     public Result<AuthDTO> loginByMobile(UserLoginRequest request) {
 
@@ -106,6 +105,7 @@ public class AuthServiceImpl implements AuthService {
      * @param request
      * @return
      */
+    @LoginRec(status = LoginStatus.IN, note = "用户账户密码登录")
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public Result<AuthDTO> login(UserLoginRequest request) {

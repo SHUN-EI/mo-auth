@@ -4,6 +4,7 @@ import lombok.Getter;
 
 /**
  * Created by mo on 2021/7/26
+ * 登录类型
  */
 @Getter
 public enum AuthType {
