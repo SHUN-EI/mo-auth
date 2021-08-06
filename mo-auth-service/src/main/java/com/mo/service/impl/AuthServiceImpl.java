@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mo.aop.LoginRec;
+import com.mo.config.WXConfig;
 import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
@@ -19,10 +20,7 @@ import com.mo.request.AuthRequest;
 import com.mo.request.UserLoginRequest;
 import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
-import com.mo.utils.IdWorker;
-import com.mo.utils.JWTUtil;
-import com.mo.utils.MacUtil;
-import com.mo.utils.RedisUtil;
+import com.mo.utils.*;
 import com.mo.validate.Mobile;
 import com.mo.validate.ValidateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +35,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +49,81 @@ public class AuthServiceImpl implements AuthService {
     private AuthMapper authMapper;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private WXConfig wxConfig;
 
+    /**
+     * 微信扫码登录/注册
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @LoginRec(status = LoginStatus.IN, type = AuthType.WEIXIN, note = "微信扫码登录/注册")
+    @Override
+    public Result<AuthDTO> loginWX(UserLoginRequest request) {
+        //根据code获取access_token 和 openid
+        String url = wxConfig.getAccessTokenUrl()
+                + "?code=" + request.getCode()
+                + "&appid=" + wxConfig.getAppid()
+                + "&secret=" + wxConfig.getSecret()
+                + "&grant_type=authorization_code";
+
+        Map<String, Object> resultMap = HttpUtil.sendGet(url);
+        Object accessToken = resultMap.get("access_token");
+        Object openId = resultMap.get("openid");
+
+        //判断access_token 和  openid是否为空
+        if (accessToken == null || openId == null) {
+            return Result.error("微信扫码失败");
+        }
+
+        //根据openid查询用户
+        //封装查询条件
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        //封装查询条件，不为null作为查询条件
+        wrapper.eq(openId != null, "weixin", openId);
+        Auth auth = authMapper.selectOne(wrapper);
+
+        //判断用户是否存在
+        if (auth != null) {
+            //如果用户存在则登录成功,更新用户最后登录时间
+            authMapper.updateLastDate(auth.getId());
+        } else {
+            //如果用户不存在
+            //判断authId是否不为空
+
+            if (StringUtils.isNoneBlank(request.getAuthId())) {
+                //如果authId不为空，表示用户已经登录，绑定用户账户即可
+                auth = authMapper.selectById(request.getAuthId());
+                //用户绑定微信
+                auth.setWeixin(openId.toString());
+                auth.setWeixinBindDate(new Date());
+                auth.setLastDate(new Date());
+
+                authMapper.updateById(auth);
+            } else {
+                //如果authId为空，表示用户未登录，进行用户注册
+                auth = Auth.builder()
+                        .weixin(openId.toString())
+                        .weixinBindDate(new Date())
+                        .status(1)
+                        .createDate(new Date())
+                        .lastDate(new Date())
+                        .build();
+
+                authMapper.insert(auth);
+            }
+        }
+
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
+
+        return Result.success("微信登录成功", authDTO);
+    }
 
     /**
      * 用户登录-手机验证码登录
@@ -58,7 +131,8 @@ public class AuthServiceImpl implements AuthService {
      * @param request
      * @return
      */
-    @LoginRec(status = LoginStatus.IN,note = "手机验证码登录")
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @LoginRec(status = LoginStatus.IN, note = "手机验证码登录")
     @Override
     public Result<AuthDTO> loginByMobile(UserLoginRequest request) {
 

@@ -27,4 +27,6 @@ public interface AuthService {
     Result<AuthDTO> login(UserLoginRequest request);
 
     Result<AuthDTO> loginByMobile(UserLoginRequest request);
+
+    Result<AuthDTO> loginWX(UserLoginRequest request);
 }

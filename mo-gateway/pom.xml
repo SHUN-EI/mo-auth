@@ -37,13 +37,6 @@
             </exclusions>
         </dependency>
 
-        <!-- httpClient依赖,缺少此依赖api网关转发请求时可能发生503错误 -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.5</version>
-        </dependency>
-
         <!--添加gateway网关-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

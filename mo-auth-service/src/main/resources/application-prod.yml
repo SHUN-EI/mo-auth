@@ -32,3 +32,10 @@ logging:
     root: INFO
     #nacos日志问题
     com.alibaba.nacos.client.config.impl: WARN
+#微信登录配置
+wx:
+  appid: wx3bdb1192c22883f3
+  secret: db9d6b88821df403e5ff11742e799105
+  accessTokenUrl: https://api.weixin.qq.com/sns/oauth2/access_token
+  accessRefreshUrl: https://api.weixin.qq.com/sns/oauth2/refresh_token
+  wxInfoUrl: https://api.weixin.qq.com/sns/userinfo

@@ -35,6 +35,17 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @ApiOperation("微信扫码登录/注册接口")
+    @PostMapping("/loginWX")
+    public Result<AuthDTO> loginWX(@ApiParam(value = "用户登录请求对象", required = true)
+                                   @Validated
+                                   @RequestBody UserLoginRequest request) {
+
+        Result<AuthDTO> authDTO = authService.loginWX(request);
+        return authDTO;
+
+    }
+
 
     @ApiOperation("用户登录-手机验证码登录")
     @PostMapping("/loginByMobile")
