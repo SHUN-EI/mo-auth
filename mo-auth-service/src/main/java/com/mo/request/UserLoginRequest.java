@@ -27,7 +27,7 @@ public class UserLoginRequest {
     private String userName;
 
     @ApiModelProperty(value = "用户密码")
-    @NotBlank(message = "用户密码不能为空")
+    //@NotBlank(message = "用户密码不能为空")
     //@Length(min = 6, max = 20, message = "密码长度最少6位，最多20位")
     private String password;
 
