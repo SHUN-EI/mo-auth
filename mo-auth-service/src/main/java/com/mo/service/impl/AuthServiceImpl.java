@@ -10,9 +10,11 @@ import com.mo.config.WXConfig;
 import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
+import com.mo.entity.WxInfo;
 import com.mo.enums.*;
 import com.mo.exception.BizException;
 import com.mo.mapper.AuthMapper;
+import com.mo.mapper.WxInfoMapper;
 import com.mo.model.Result;
 import com.mo.model.ResultCode;
 import com.mo.model.ResultPage;
@@ -51,6 +53,8 @@ public class AuthServiceImpl implements AuthService {
     private RedisUtil redisUtil;
     @Autowired
     private WXConfig wxConfig;
+    @Autowired
+    private WxInfoMapper wxInfoMapper;
 
     /**
      * 微信扫码登录/注册
@@ -72,6 +76,8 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> resultMap = HttpUtil.sendGet(url);
         Object accessToken = resultMap.get("access_token");
         Object openId = resultMap.get("openid");
+        Object refreshToken = resultMap.get("refresh_token");
+        Object unionId = resultMap.get("unionid");
 
         //判断access_token 和  openid是否为空
         if (accessToken == null || openId == null) {
@@ -89,10 +95,23 @@ public class AuthServiceImpl implements AuthService {
         if (auth != null) {
             //如果用户存在则登录成功,更新用户最后登录时间
             authMapper.updateLastDate(auth.getId());
+
+            //如果用户存在，更新接口调用凭证
+            QueryWrapper<WxInfo> wxWrapper = new QueryWrapper<>();
+            wxWrapper.eq(openId != null, "openid", openId);
+            WxInfo wxInfo = wxInfoMapper.selectOne(wxWrapper);
+            if (wxInfo != null) {
+                wxInfo.setAccessToken(accessToken.toString());
+                wxInfo.setAccessTokenDate(new Date());
+                wxInfo.setRefreshToken(refreshToken.toString());
+                wxInfo.setRefreshTokenDate(new Date());
+                wxInfo.setUpdateDate(new Date());
+                wxInfoMapper.updateById(wxInfo);
+            }
+
         } else {
             //如果用户不存在
             //判断authId是否不为空
-
             if (StringUtils.isNoneBlank(request.getAuthId())) {
                 //如果authId不为空，表示用户已经登录，绑定用户账户即可
                 auth = authMapper.selectById(request.getAuthId());
@@ -114,6 +133,21 @@ public class AuthServiceImpl implements AuthService {
 
                 authMapper.insert(auth);
             }
+
+            //如果用户不存在，新增接口调用凭证
+            WxInfo wxInfo = WxInfo.builder()
+                    .authId(auth.getId())
+                    .openid(openId.toString())
+                    .unionid(unionId.toString())
+                    .accessToken(accessToken.toString())
+                    .accessTokenDate(new Date())
+                    .refreshToken(refreshToken.toString())
+                    .refreshTokenDate(new Date())
+                    .createDate(new Date())
+                    .updateDate(new Date())
+                    .build();
+
+            wxInfoMapper.insert(wxInfo);
         }
 
         AuthDTO authDTO = new AuthDTO();

@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>微信登录</title>
+    <script src="js/jquery-1.11.3.js"></script>
+</head>
+<body>
+<h3>微信登录结果页</h3>
+
+<h3>微信扫码结果：</h3>
+<div id="msg"></div>
+
+<h3>鉴权token：</h3>
+<div id="token"></div>
+
+<script>
+    //获取请求参数code
+    var code = getQueryString('code');
+
+    //发起请求到后台服务，携带code
+    $(function () {
+        $.ajax({
+            url:'/login/wx',
+            type:'POST',
+            data:JSON.stringify({"code":code}),
+            dataType:'json',
+            contentType:"application/json;charset=utf-8",
+            //请求头，
+            // 如果用户未登录，就进行登录，也可以理解为微信注册
+            // 如果用户已登录，请求头携带用户的authId，也可以理解为绑定微信
+            headers:{"authId":"1253553358925529089"},
+            success: function (res) {
+                $('#msg').html(res.msg);
+                $('#token').html(res.data);
+            }
+        })
+    })
+
+    function getQueryString(name)
+    {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if(r!=null)return  unescape(r[2]); return null;
+    }
+</script>
+</body>
+</html>
