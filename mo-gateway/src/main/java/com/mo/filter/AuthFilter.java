@@ -2,10 +2,13 @@ package com.mo.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mo.constant.CacheKey;
 import com.mo.model.VerifyResult;
 import com.mo.utils.JWTUtil;
+import com.mo.utils.RedisUtil;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -28,6 +31,9 @@ import java.util.Map;
 @Component
 @ConfigurationProperties(prefix = "jwt")
 public class AuthFilter implements GlobalFilter, Ordered {
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 鉴权排除的接口
@@ -53,11 +59,18 @@ public class AuthFilter implements GlobalFilter, Ordered {
         //对所有的接口都进行鉴权
         VerifyResult verifyResult = JWTUtil.checkJWT(token);
         if (verifyResult.isValidate()) {
-            //鉴权成功，获取authId并设置到请求头中
-            exchange.getRequest().mutate().headers(h -> h.add("authId", verifyResult.getAuthId()));
 
-            //返回结果，放行，转发
-            return chain.filter(exchange);
+            //从redis中查询token
+            String redisToken = redisUtil.get(CacheKey.getJwtToken(verifyResult.getAuthId()));
+
+            //判断查询的redis中的token不为空，而且和现在正在使用的token一致，才可以进行登录后的操作
+            if (redisToken != null || token.equals(redisToken)) {
+                //鉴权成功，获取authId并设置到请求头中
+                exchange.getRequest().mutate().headers(h -> h.add("authId", verifyResult.getAuthId()));
+
+                //返回结果，放行，转发
+                return chain.filter(exchange);
+            }
         }
 
         //获取当前请求的url
@@ -70,9 +83,19 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
 
         ServerHttpResponse response = exchange.getResponse();
+
+        //提示用户已经注销,合法的token才可以注销
+        if (verifyResult.isValidate()) {
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("code", 401);
+            responseData.put("msg", "用户已经注销");
+            return responseError(response, responseData);
+        }
+
+
         //判断token是否为空，就是非法请求
         if (StringUtils.isBlank(token)) {
-            Map responseData = new HashMap<>();
+            Map<String, Object> responseData = new HashMap<>();
             responseData.put("code", 401);
             responseData.put("msg", "非法请求，token为空");
             return responseError(response, responseData);
