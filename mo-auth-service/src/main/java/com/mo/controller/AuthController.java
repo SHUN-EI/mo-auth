@@ -35,6 +35,14 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+
+    @ApiOperation(value = "根据认证信息主键刷新接口调用凭证access_token")
+    @GetMapping(value = "/wxToken/{authId}")
+    public Result refreshWxToken(@PathVariable String authId) {
+
+        return authService.refreshWxToken(authId);
+    }
+
     @ApiOperation("微信扫码登录/注册接口")
     @PostMapping("/loginWX")
     public Result<AuthDTO> loginWX(@ApiParam(value = "用户登录请求对象", required = true)

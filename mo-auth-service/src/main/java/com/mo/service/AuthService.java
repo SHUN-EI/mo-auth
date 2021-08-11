@@ -29,4 +29,6 @@ public interface AuthService {
     Result<AuthDTO> loginByMobile(UserLoginRequest request);
 
     Result<AuthDTO> loginWX(UserLoginRequest request);
+
+    Result refreshWxToken(String authId);
 }

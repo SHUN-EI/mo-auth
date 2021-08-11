@@ -35,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +57,64 @@ public class AuthServiceImpl implements AuthService {
     private WXConfig wxConfig;
     @Autowired
     private WxInfoMapper wxInfoMapper;
+
+
+    /**
+     * 根据认证信息主键刷新接口调用凭证access_token
+     *
+     * @param authId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result refreshWxToken(String authId) {
+        //根据id查询微信信息
+        WxInfo wxInfo = wxInfoMapper.selectById(authId);
+
+        //判断查询结果是否为空
+        if (null == wxInfo) {
+            return Result.error("用户没有绑定微信号");
+        }
+
+        //判断当前的access_token有效时间是否小于7000秒
+        Instant accessTokenTime = wxInfo.getAccessTokenDate().toInstant().plusSeconds(7000);
+        //当前时间没有过期
+        if (new Date().toInstant().compareTo(accessTokenTime) < 0) {
+            //如果小于7000秒，直接返回access_token
+            return Result.success("access_token获取成功", wxInfo.getAccessToken());
+        }
+
+        //如果access_token已经过期，需要使用refresh_token进行刷新
+        //refresh_token有效时间是30天
+        Instant refreshTokenTime = wxInfo.getRefreshTokenDate().toInstant().plus(30, ChronoUnit.DAYS);
+        //当前时间超过，表示过期了
+        if (new Date().toInstant().compareTo(refreshTokenTime) > 0) {
+            //如果refresh_token已经过期，返回过期信息
+            return Result.error("微信登录过期，需要用户重新登录授权");
+        }
+
+        //使用refresh_token获取新的access_token
+        String url = wxConfig.getAccessRefreshUrl()
+                + "?appid=" + wxConfig.getAppid()
+                + "&grant_type=refresh_token"
+                + "&refresh_token=" + wxInfo.getRefreshToken();
+
+        Map<String, Object> resultMap = HttpUtil.sendGet(url);
+        Object accessToken = resultMap.get("access_token");
+
+        //判断获取到的access_token是否为空
+        if (null == accessToken) {
+            return Result.error("刷新微信access_token失败");
+        }
+
+        //更新access_token
+        wxInfo.setAccessToken(accessToken.toString());
+        wxInfo.setAccessTokenDate(new Date());
+        wxInfoMapper.updateById(wxInfo);
+
+        return Result.success("access_token获取成功", wxInfo.getAccessToken());
+
+    }
 
     /**
      * 微信扫码登录/注册
