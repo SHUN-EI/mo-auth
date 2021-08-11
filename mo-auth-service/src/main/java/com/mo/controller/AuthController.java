@@ -35,6 +35,13 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+
+    @ApiOperation("根据认证信息主键ID解绑微信")
+    @PostMapping("/unbindWx")
+    public Result unbindWx(@RequestBody UserLoginRequest request) {
+        return authService.unbindWx(request);
+    }
+
     @ApiOperation("刷新用户个人信息(调用微信接口查询)")
     @PostMapping("/refreshWxInfo")
     public Result refreshWxInfo(@RequestBody UserLoginRequest request) {

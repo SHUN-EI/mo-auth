@@ -35,4 +35,6 @@ public interface AuthService {
     Result queryWxInfo(UserLoginRequest request);
 
     Result refreshWxInfo(UserLoginRequest request);
+
+    Result unbindWx(UserLoginRequest request);
 }

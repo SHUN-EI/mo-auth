@@ -58,6 +58,31 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private WxInfoMapper wxInfoMapper;
 
+    /**
+     * 根据认证信息主键ID解绑微信
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result unbindWx(UserLoginRequest request) {
+
+        Auth auth = authMapper.selectById(request.getAuthId());
+        if (auth == null) {
+            return Result.error("用户不存在");
+        }
+
+        //更新用户微信相关信息
+        auth.setWeixin(null);
+        auth.setWeixinBindDate(null);
+        authMapper.updateById(auth);
+
+        //删除微信个人信息
+        wxInfoMapper.deleteById(request.getAuthId());
+
+        return Result.success("解绑微信成功");
+    }
 
     /**
      * 刷新用户个人信息(调用微信接口查询)
