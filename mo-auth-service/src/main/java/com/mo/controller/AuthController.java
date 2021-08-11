@@ -35,9 +35,21 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @ApiOperation("刷新用户个人信息(调用微信接口查询)")
+    @PostMapping("/refreshWxInfo")
+    public Result refreshWxInfo(@RequestBody UserLoginRequest request) {
+        return authService.refreshWxInfo(request);
+    }
 
-    @ApiOperation(value = "根据认证信息主键刷新接口调用凭证access_token")
-    @GetMapping(value = "/wxToken/{authId}")
+    @ApiOperation("查询用户微信个人信息(从数据库查询)")
+    @PostMapping("/queryWxInfo")
+    public Result queryWxInfo(@RequestBody UserLoginRequest request) {
+        return authService.queryWxInfo(request);
+    }
+
+
+    @ApiOperation("根据认证信息主键刷新接口调用凭证access_token")
+    @GetMapping("/wxToken/{authId}")
     public Result refreshWxToken(@PathVariable String authId) {
 
         return authService.refreshWxToken(authId);

@@ -60,6 +60,75 @@ public class AuthServiceImpl implements AuthService {
 
 
     /**
+     * 刷新用户个人信息(调用微信接口查询)
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result refreshWxInfo(UserLoginRequest request) {
+        //获取微信个人信息，根据authId查询数据库
+        WxInfo wxInfo = wxInfoMapper.selectById(request.getAuthId());
+
+        //如果结果为空，表示用户未绑定微信
+        if (wxInfo == null) {
+            return Result.error("用户未绑定微信号");
+        }
+
+        //获取微信接口调用凭证 access_token
+        Result wxToken = refreshWxToken(request.getAuthId());
+
+        //判断凭证是否正常获取,接口调用成功状态码为200
+        if (wxToken.getCode() != ResultCode.OK) {
+            return wxToken;
+        }
+
+        //access_token能够正常获取，就调用微信接口查询个人微信信息
+        String url = wxConfig.getWxInfoUrl()
+                + "?access_token=" + wxToken.getData()
+                + "&openid=" + wxInfo.getOpenid();
+
+        Map<String, Object> resultMap = HttpUtil.sendGet(url);
+        Object openid = resultMap.get("openid");
+
+        //判断查询结果是否正确，根据openId判断
+        if (null == openid || !wxInfo.getOpenid().equals(openid.toString())) {
+            return Result.error("查询微信个人信息错误");
+        }
+
+        //保存微信个人信息
+        wxInfo.setNickname(resultMap.get("nickname").toString());
+        wxInfo.setSex(resultMap.get("sex").toString());
+        wxInfo.setProvince(resultMap.get("province").toString());
+        wxInfo.setCity(resultMap.get("city").toString());
+        wxInfo.setCountry(resultMap.get("country").toString());
+        wxInfo.setHeadimgurl(resultMap.get("headimgurl").toString());
+        wxInfo.setUpdateDate(new Date());
+
+        wxInfoMapper.updateById(wxInfo);
+
+        return Result.success("获取最新微信个人信息成功", wxInfo);
+    }
+
+    /**
+     * 查询用户微信个人信息(从数据库查询)
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public Result queryWxInfo(UserLoginRequest request) {
+        WxInfo wxInfo = wxInfoMapper.selectById(request.getAuthId());
+
+        if (wxInfo == null) {
+            return Result.error("用户未绑定微信号");
+        }
+
+        return Result.success("用户微信个人信息查询成功", wxInfo);
+    }
+
+    /**
      * 根据认证信息主键刷新接口调用凭证access_token
      *
      * @param authId

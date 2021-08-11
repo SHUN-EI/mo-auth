@@ -31,4 +31,8 @@ public interface AuthService {
     Result<AuthDTO> loginWX(UserLoginRequest request);
 
     Result refreshWxToken(String authId);
+
+    Result queryWxInfo(UserLoginRequest request);
+
+    Result refreshWxInfo(UserLoginRequest request);
 }
