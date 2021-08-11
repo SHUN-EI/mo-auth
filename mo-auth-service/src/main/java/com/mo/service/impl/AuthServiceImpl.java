@@ -310,6 +310,9 @@ public class AuthServiceImpl implements AuthService {
         String token = JWTUtil.generateJsonWebToken(auth.getId());
         authDTO.setToken(token);
 
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
+
         return Result.success("微信登录成功", authDTO);
     }
 
@@ -357,6 +360,10 @@ public class AuthServiceImpl implements AuthService {
 
         String token = JWTUtil.generateJsonWebToken(auth.getId());
         authDTO.setToken(token);
+
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
+
 
         return Result.success("账户登录成功", authDTO);
     }
@@ -430,6 +437,9 @@ public class AuthServiceImpl implements AuthService {
         String token = JWTUtil.generateJsonWebToken(auth.getId());
         authDTO.setToken(token);
 
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
+
         return Result.success("账户登录成功", authDTO);
     }
 
@@ -490,6 +500,9 @@ public class AuthServiceImpl implements AuthService {
         String token = JWTUtil.generateJsonWebToken(auth.getId());
         authDTO.setToken(token);
 
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
+
         return Result.success("账户注册成功", authDTO);
     }
 
@@ -546,6 +559,9 @@ public class AuthServiceImpl implements AuthService {
         String token = JWTUtil.generateJsonWebToken(auth.getId());
         authDTO.setToken(token);
 
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
+
         return Result.success("账户注册成功", authDTO);
 
     }
@@ -599,6 +615,9 @@ public class AuthServiceImpl implements AuthService {
 
         String token = JWTUtil.generateJsonWebToken(auth.getId());
         authDTO.setToken(token);
+
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
 
         return Result.success("账户注册成功", authDTO);
     }

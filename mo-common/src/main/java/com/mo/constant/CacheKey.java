@@ -12,6 +12,8 @@ public class CacheKey {
     public static final long CAPTCHACOUNT = 6;
     //验证码有效时间，5分钟
     public static final long CAPTCHAEXPIRE = 5 * 60;
+    //redis的保存token的有效时间为token的有效时间
+    public static final long TOKENEXPIRETIME = 3 * 24 * 60 * 60;
 
     //维护redis中验证码的key的前缀
     //图片验证码
