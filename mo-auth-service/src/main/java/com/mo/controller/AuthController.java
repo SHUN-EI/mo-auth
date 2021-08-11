@@ -35,6 +35,12 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @ApiOperation("用户注销")
+    @PostMapping("/logout")
+    public Result logout(@RequestBody UserLoginRequest request) {
+        return authService.logout(request);
+    }
+
 
     @ApiOperation("根据认证信息主键ID解绑微信")
     @PostMapping("/unbindWx")

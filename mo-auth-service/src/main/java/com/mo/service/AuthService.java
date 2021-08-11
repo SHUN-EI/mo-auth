@@ -37,4 +37,6 @@ public interface AuthService {
     Result refreshWxInfo(UserLoginRequest request);
 
     Result unbindWx(UserLoginRequest request);
+
+    Result logout(UserLoginRequest request);
 }

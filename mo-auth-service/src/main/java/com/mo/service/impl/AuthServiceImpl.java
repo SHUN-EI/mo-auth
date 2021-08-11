@@ -59,6 +59,19 @@ public class AuthServiceImpl implements AuthService {
     private WxInfoMapper wxInfoMapper;
 
     /**
+     * 用户注销
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    @LoginRec(status = LoginStatus.OUT, note = "用户注销")
+    public Result logout(UserLoginRequest request) {
+        redisUtil.del(CacheKey.getJwtToken(request.getAuthId()));
+        return Result.success("用户注销成功", request.getAuthId());
+    }
+
+    /**
      * 根据认证信息主键ID解绑微信
      *
      * @param request
