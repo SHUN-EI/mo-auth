@@ -28,7 +28,7 @@ public class UserRegisterRequest {
     //@JsonIgnore 的作用 转换为Json数据的时候，忽略密码
     //@JsonIgnore//在接受数据的时候，不能使用注解，否则数据会转换丢失
     @ApiModelProperty(value = "用户注册密码", example = "123456")
-    @NotBlank(message = "用户密码不能为空")
+    //@NotBlank(message = "用户密码不能为空")
     @Length(min = 6, max = 20, message = "密码长度最少6位，最多20位")
     private String password;
 

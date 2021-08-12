@@ -45,4 +45,6 @@ public interface AuthService {
     Result pwdByMobile(UserLoginRequest request);
 
     Result pwdByEmail(UserLoginRequest request);
+
+    Result updateAuth(UserRegisterRequest request);
 }

@@ -35,6 +35,12 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @ApiOperation("根据id修改用户认证信息")
+    @PostMapping("/updateAuth")
+    public Result updateAuth(@RequestBody UserRegisterRequest request) {
+        return authService.updateAuth(request);
+    }
+
     @ApiOperation("根据Email邮箱验证码修改密码")
     @PostMapping("/pwdByEmail")
     public Result pwdByEmail(@RequestBody UserLoginRequest request) {

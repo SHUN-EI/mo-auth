@@ -24,6 +24,7 @@ import com.mo.request.UserRegisterRequest;
 import com.mo.service.AuthService;
 import com.mo.utils.*;
 import com.mo.validate.Mobile;
+import com.mo.validate.UserName;
 import com.mo.validate.ValidateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +59,91 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private WxInfoMapper wxInfoMapper;
 
+    /**
+     * 根据id修改用户认证信息
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public Result updateAuth(UserRegisterRequest request) {
+
+        Auth auth = authMapper.selectById(request.getAuthId());
+
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+
+        String userName = request.getUserName();
+        //修改用户名
+        if (StringUtils.isNotBlank(userName)) {
+            wrapper.eq("user_name", userName);
+
+            Integer count = authMapper.selectCount(wrapper);
+            if (count > 0) {
+                throw new BizException(BizCodeEnum.USER_EXISTS);
+            }
+
+            //修改用户名
+            auth.setUserName(userName);
+        }
+
+        String email = request.getEmail();
+        String code = request.getCode();
+        //修改邮箱，需要使用邮箱验证码
+        if (StringUtils.isNotBlank(email) && StringUtils.isNotBlank(code)) {
+
+            //邮箱验证码缓存key
+            String cachekey = String.format(CacheKey.CHECK_CODE_KEY, SendCodeEnum.USER_REGISTER, email);
+
+            //获取redis中的验证码
+            String cacheCode = redisUtil.get(cachekey);
+            //判断用户传递的code验证码是否正确
+            if (!request.getCode().equals(cacheCode)) {
+                throw new BizException(BizCodeEnum.CODE_ERROR);
+            }
+
+            wrapper.eq("email", email);
+            Integer count = authMapper.selectCount(wrapper);
+            if (count > 0) {
+                throw new BizException(BizCodeEnum.USER_EMAIL_EXISTS);
+            }
+
+            //修改邮箱
+            auth.setEmail(email);
+            auth.setEmailBindDate(new Date());
+        }
+
+        //修改手机号,需要使用手机号验证码
+        String mobile = request.getMobile();
+        if (StringUtils.isNotBlank(mobile) && StringUtils.isNotBlank(code)) {
+
+            //手机号验证码缓存key
+            String cachekey = String.format(CacheKey.CHECK_CODE_KEY, SendCodeEnum.USER_REGISTER, mobile);
+
+            //校验验证码
+            String cacheCode = redisUtil.get(cachekey);
+            if (!request.getCode().equals(cacheCode)) {
+                throw new BizException(BizCodeEnum.CODE_ERROR);
+            }
+
+            wrapper.eq("mobile", mobile);
+            Integer count = authMapper.selectCount(wrapper);
+            if (count > 0) {
+                throw new BizException(BizCodeEnum.USER_MOBILE_EXISTS);
+            }
+
+            //修改手机号
+            auth.setMobile(mobile);
+            auth.setMobileBindDate(new Date());
+        }
+
+        int result = authMapper.updateById(auth);
+        //执行修改
+        if (result > 0) {
+            return Result.success("用户认证信息修改成功", auth);
+        }
+
+        return Result.error("用户认证信息修改失败");
+    }
 
     /**
      * 根据Email邮箱验证码修改密码
