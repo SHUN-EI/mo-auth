@@ -58,6 +58,124 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private WxInfoMapper wxInfoMapper;
 
+
+    /**
+     * 根据Email邮箱验证码修改密码
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result pwdByEmail(UserLoginRequest request) {
+
+        String email = request.getEmail();
+        //邮箱验证码缓存key
+        String cachekey = String.format(CacheKey.CHECK_CODE_KEY, SendCodeEnum.USER_REGISTER, email);
+
+        //获取redis中的验证码
+        String cacheCode = redisUtil.get(cachekey);
+        //判断用户传递的code验证码是否正确
+        if (!request.getCode().equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //根据email邮箱查询用户
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(request.getEmail() != null, "email", request.getEmail());
+        Auth auth = authMapper.selectOne(wrapper);
+
+        //修改密码
+        String password = MacUtil.makeHashPassword(request.getPassword());
+        auth.setPassword(password);
+        authMapper.updateById(auth);
+
+        //修改密码后，需要让当前的token失效
+        redisUtil.del(CacheKey.getJwtToken(auth.getId()));
+
+        return Result.success("密码修改成功", auth.getId());
+    }
+
+    /**
+     * 根据手机号验证码修改密码
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result pwdByMobile(UserLoginRequest request) {
+
+        //手机号获取
+        String mobile = request.getMobile();
+
+        //手机号验证码缓存key
+        String cachekey = String.format(CacheKey.CHECK_CODE_KEY, SendCodeEnum.USER_REGISTER, mobile);
+
+        //校验验证码
+        String cacheCode = redisUtil.get(cachekey);
+        if (!request.getCode().equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //根据手机号查询用户
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(request.getMobile() != null, "mobile", request.getMobile());
+        Auth auth = authMapper.selectOne(wrapper);
+
+        //修改密码
+        String password = MacUtil.makeHashPassword(request.getPassword());
+        auth.setPassword(password);
+        authMapper.updateById(auth);
+
+        //修改密码后，需要让当前的token失效
+        redisUtil.del(CacheKey.getJwtToken(auth.getId()));
+
+        return Result.success("密码修改成功", auth.getId());
+    }
+
+    /**
+     * 根据旧密码修改密码
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result pwdByOld(UserLoginRequest request) {
+
+        //获取图片验证码
+        String key = request.getKey();
+        String code = request.getCode();
+
+        //校验图片验证码,使用图片验证码，确保是人进行的访问
+        String cacheCode = redisUtil.get(key);
+        if (code == null || !code.equals(cacheCode)) {
+            throw new BizException(BizCodeEnum.CODE_ERROR);
+        }
+
+        //根据用户ID查询用户信息
+        Auth auth = authMapper.selectById(request.getAuthId());
+
+        //请求传过来的旧密码，需要加密比对
+        String oldPassword = MacUtil.makeHashPassword(request.getOldPassword());
+        //判断旧密码是否错误
+        if (auth == null || !auth.getPassword().equals(oldPassword)) {
+            throw new BizException(BizCodeEnum.ACCOUNT_PWD_ERROR);
+        }
+
+        //修改密码
+        String password = MacUtil.makeHashPassword(request.getPassword());
+        auth.setPassword(password);
+        authMapper.updateById(auth);
+
+        //修改密码后，需要让当前的token失效
+        redisUtil.del(CacheKey.getJwtToken(auth.getId()));
+
+        return Result.success("密码修改成功", auth.getId());
+    }
+
+
     /**
      * 用户注销
      *

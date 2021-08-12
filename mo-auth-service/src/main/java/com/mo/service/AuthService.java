@@ -39,4 +39,10 @@ public interface AuthService {
     Result unbindWx(UserLoginRequest request);
 
     Result logout(UserLoginRequest request);
+
+    Result pwdByOld(UserLoginRequest request);
+
+    Result pwdByMobile(UserLoginRequest request);
+
+    Result pwdByEmail(UserLoginRequest request);
 }

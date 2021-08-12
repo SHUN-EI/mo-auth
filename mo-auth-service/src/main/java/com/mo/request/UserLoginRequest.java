@@ -67,4 +67,7 @@ public class UserLoginRequest {
 
     @ApiModelProperty(value = "所在纬度", example = "40.066241")
     private String latitude;
+
+    @ApiModelProperty(value = "用户修改密码使用的旧密码")
+    private String oldPassword;
 }

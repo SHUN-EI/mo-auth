@@ -35,6 +35,24 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @ApiOperation("根据Email邮箱验证码修改密码")
+    @PostMapping("/pwdByEmail")
+    public Result pwdByEmail(@RequestBody UserLoginRequest request) {
+        return authService.pwdByEmail(request);
+    }
+
+    @ApiOperation("根据手机号验证码修改密码")
+    @PostMapping("/pwdByMobile")
+    public Result pwdByMobile(@RequestBody UserLoginRequest request) {
+        return authService.pwdByMobile(request);
+    }
+
+    @ApiOperation("根据旧密码修改密码")
+    @PostMapping("/pwdByOld")
+    public Result pwdByOld(@RequestBody UserLoginRequest request) {
+        return authService.pwdByOld(request);
+    }
+
     @ApiOperation("用户注销")
     @PostMapping("/logout")
     public Result logout(@RequestBody UserLoginRequest request) {
