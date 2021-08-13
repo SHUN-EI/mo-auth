@@ -68,6 +68,8 @@ public class AuthFilter implements GlobalFilter, Ordered {
                 //鉴权成功，获取authId并设置到请求头中
                 exchange.getRequest().mutate().headers(h -> h.add("authId", verifyResult.getAuthId()));
 
+                //TODO 重新生成token,若token的失效时间比较短，在这里重新生成token,可以做到无感知续期token
+
                 //返回结果，放行，转发
                 return chain.filter(exchange);
             }
