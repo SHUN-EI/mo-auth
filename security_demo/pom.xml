@@ -36,6 +36,13 @@
             <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
+
+        <!--防止XSS攻击的antiSamy-->
+        <dependency>
+            <groupId>org.owasp.antisamy</groupId>
+            <artifactId>antisamy</artifactId>
+            <version>1.5.7</version>
+        </dependency>
     </dependencies>
 
 </project>
