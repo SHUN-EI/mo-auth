@@ -1,6 +1,7 @@
 package com.mo.controller;
 
 import com.mo.entity.User;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by mo on 2021/8/13
  */
-@RestController
-@RequestMapping("user")
+@Controller
+@RequestMapping("/user")
 public class UserController {
 
     //模拟数据库存储

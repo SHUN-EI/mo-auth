@@ -1,0 +1,7 @@
+#指定模版后缀,SpringBoot在2.2.X中，已经把原先默认的后缀名.ftl改成了.ftlh
+spring:
+  freemarker:
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+    charset: utf-8
+    content-type: text/html
