@@ -112,7 +112,12 @@ public class XssRequestWrapper extends HttpServletRequestWrapper {
         System.out.println("过滤前:" + sb.toString());
 
         //对map中的value值进行AntiSamy的过滤
-        map.keySet().forEach(k -> map.put(k, xssClean(map.get(k).toString())));
+        map.keySet().forEach(k -> {
+            //password和oldPassword不应该被处理，可以为任意字符
+            if (!"password".equals(k) || !"oldPassword".equals(k)) {
+                map.put(k, xssClean(map.get(k).toString()));
+            }
+        });
 
         //过滤后
         String jsonString = JSON.toJSONString(map);
