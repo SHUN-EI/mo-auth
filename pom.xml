@@ -13,6 +13,7 @@
         <module>mo-auth-service</module>
         <module>mo-notify-service</module>
         <module>mo-gateway</module>
+        <module>mo-user</module>
     </modules>
 
     <properties>

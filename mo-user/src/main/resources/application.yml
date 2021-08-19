@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: mo-user-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 39.108.182.26:8848
+      config:
+        server-addr: 39.108.182.26:8848
+        file-extension: yml
+server:
+  port: 8777

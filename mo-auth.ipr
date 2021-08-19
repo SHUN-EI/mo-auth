@@ -102,6 +102,8 @@ under the License.
       <module filepath="$PROJECT_DIR$/mo-common/mo-common.iml"/>
       <module filepath="$PROJECT_DIR$/mo-auth-service/mo-auth-service.iml"/>
       <module filepath="$PROJECT_DIR$/mo-notify-service/mo-notify-service.iml"/>
+      <module filepath="$PROJECT_DIR$/mo-gateway/mo-gateway.iml"/>
+      <module filepath="$PROJECT_DIR$/mo-user/mo-user.iml"/>
     </modules> 
   </component>  
   <UsedPathMacros> 

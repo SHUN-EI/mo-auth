@@ -9,17 +9,15 @@
         <outputRelativeToContentRoot value="true" />
         <module name="security-csrf" />
         <module name="mo-auth-service" />
+        <module name="mo-user" />
         <module name="mo-notify-service" />
         <module name="mo-gateway" />
         <module name="mo-common" />
       </profile>
-      <profile name="Annotation profile for security_demo" enabled="true">
-        <sourceOutputDir name="../security_demo/target/generated-sources/annotations" />
-        <sourceTestOutputDir name="../security_demo/target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="security-demo" />
-      </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="security-demo" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
