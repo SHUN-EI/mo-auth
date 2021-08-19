@@ -10,6 +10,7 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/security_demo/pom.xml" />
         <option value="$PROJECT_DIR$/security-csrf/pom.xml" />
+        <option value="$PROJECT_DIR$/security-test/pom.xml" />
       </list>
     </option>
   </component>

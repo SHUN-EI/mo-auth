@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mo</groupId>
-    <artifactId>security_demo</artifactId>
+    <artifactId>security-test</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <parent>
@@ -50,5 +50,6 @@
             <version>1.2.58</version>
         </dependency>
     </dependencies>
+
 
 </project>
