@@ -39,3 +39,11 @@ wx:
   accessTokenUrl: https://api.weixin.qq.com/sns/oauth2/access_token
   accessRefreshUrl: https://api.weixin.qq.com/sns/oauth2/refresh_token
   wxInfoUrl: https://api.weixin.qq.com/sns/userinfo
+#微博登录配置
+wb:
+  appid: 2522924994
+  secret: 0da052749f90fd83b3c63cf9942f185f
+  redirect_uri: http://note.java.itcast.cn/
+  authorizeUrl: https://api.weibo.com/oauth2/authorize
+  accessTokenUrl: https://api.weibo.com/oauth2/access_token
+  wbInfoUrl: https://api.weibo.com/2/users/show.json
