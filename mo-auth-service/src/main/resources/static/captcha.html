@@ -14,10 +14,16 @@
 <h3>微信三方登录</h3>
 <div id="weixin"></div>
 
+
+<h3>新浪微博三方登录</h3>
+<a href="https://api.weibo.com/oauth2/authorize?client_id=2522924994&redirect_uri=http://note.java.itcast.cn/wbLogin.html">
+    微博登陆按钮
+</a>
+
 <script>
     var captchaKey;
     //使用Ajax调用接口获取图片验证码
-    $.get("/captcha/image", function (data) {
+    $.get("127.0.0.1:9002/api/notify/v1/getCaptchaCodeImage", function (data) {
         captchaKey = data.data.key
         console.log(captchaKey)
 
@@ -25,8 +31,8 @@
     }, 'json')
 
     var obj = new WxLogin({
-        self_redirect:true,
-        id:"weixin",
+        self_redirect: true,
+        id: "weixin",
         appid: "wx3bdb1192c22883f3",
         scope: "snsapi_login",
         redirect_uri: "http://note.java.itcast.cn/wxLogin.html"
