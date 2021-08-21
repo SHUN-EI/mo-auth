@@ -6,14 +6,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mo.aop.LoginRec;
+import com.mo.config.WBConfig;
 import com.mo.config.WXConfig;
 import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
+import com.mo.entity.WbInfo;
 import com.mo.entity.WxInfo;
 import com.mo.enums.*;
 import com.mo.exception.BizException;
 import com.mo.mapper.AuthMapper;
+import com.mo.mapper.WbInfoMapper;
 import com.mo.mapper.WxInfoMapper;
 import com.mo.model.Result;
 import com.mo.model.ResultCode;
@@ -39,6 +42,7 @@ import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,6 +62,113 @@ public class AuthServiceImpl implements AuthService {
     private WXConfig wxConfig;
     @Autowired
     private WxInfoMapper wxInfoMapper;
+    @Autowired
+    private WBConfig wbConfig;
+    @Autowired
+    private WbInfoMapper wbInfoMapper;
+
+    /**
+     * 微博登陆/注册接口
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result loginWB(UserLoginRequest request) {
+        //调用微博接口，使用code获取access_token和uid
+        Map params = new HashMap();
+        params.put("client_id", wbConfig.getAppid());
+        params.put("client_secret", wbConfig.getSecret());
+        params.put("grant_type", "authorization_code");
+        params.put("code", request.getCode());
+        params.put("redirect_uri", wbConfig.getRedirectUri());
+
+        //发送请求
+        Map map = HttpUtil.sendPost(wbConfig.getAccessTokenUrl(), params);
+        Object accessToken = map.get("access_token");
+        Object uid = map.get("uid");
+        int expiresIn = Integer.parseInt(map.get("expires_in").toString());
+
+        //根据access_token 和 uid判断接口调用是否成功
+        if (accessToken == null || uid == null) {
+            return Result.error("微博登陆获取access_token失败");
+        }
+
+        //根据uid查询用户是否存在
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(uid != null, "weibo", uid.toString());
+        Auth auth = authMapper.selectOne(wrapper);
+
+        //如果存在，则表示用户登录成功
+        if (auth != null) {
+            //更新登录时间
+            authMapper.updateLastDate(auth.getId());
+
+            //更新接口调用凭证access_token
+            QueryWrapper<WbInfo> wbWrapper = new QueryWrapper<>();
+            wbWrapper.eq(uid != null, "uid", uid.toString());
+            WbInfo wbInfo = wbInfoMapper.selectOne(wbWrapper);
+
+            if (wbInfo != null) {
+                wbInfo.setAccessToken(accessToken.toString());
+                wbInfo.setAccessTokenDate(new Date());
+                wbInfo.setExpiresIn(expiresIn);
+                wbInfo.setUpdateDate(new Date());
+                wbInfoMapper.updateById(wbInfo);
+            }
+        } else {
+            //如果不存在,判断authId是否为空
+            if (StringUtils.isNotBlank(request.getAuthId())) {
+
+                //如果authId不为空，表示用户已经登录，绑定微博
+                auth = authMapper.selectById(request.getAuthId());
+                auth.setWeibo(uid.toString());
+                auth.setWeiboBindDate(new Date());
+                auth.setLastDate(new Date());
+
+                authMapper.updateById(auth);
+            } else {
+                //如果authId为空，表示用户未登录，注册新用户
+                auth = Auth.builder()
+                        .weibo(uid.toString())
+                        .weiboBindDate(new Date())
+                        .status(1)
+                        .createDate(new Date())
+                        .lastDate(new Date())
+                        .build();
+
+                authMapper.insert(auth);
+            }
+
+            //保存微博个人信息
+            WbInfo wbInfo = WbInfo.builder()
+                    .authId(auth.getId())
+                    .uid(uid.toString())
+                    .accessToken(accessToken.toString())
+                    .accessTokenDate(new Date())
+                    .expiresIn(expiresIn)
+                    .createDate(new Date())
+                    .updateDate(new Date())
+                    .build();
+
+            wbInfoMapper.insert(wbInfo);
+
+        }
+
+
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
+
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
+
+        return Result.success("微博登录成功", authDTO);
+
+    }
 
     /**
      * 根据id修改用户认证信息
@@ -65,6 +176,7 @@ public class AuthServiceImpl implements AuthService {
      * @param request
      * @return
      */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     @Override
     public Result updateAuth(UserRegisterRequest request) {
 
@@ -459,7 +571,7 @@ public class AuthServiceImpl implements AuthService {
         //封装查询条件
         QueryWrapper<Auth> wrapper = new QueryWrapper<>();
         //封装查询条件，不为null作为查询条件
-        wrapper.eq(openId != null, "weixin", openId);
+        wrapper.eq(openId != null, "weixin", openId.toString());
         Auth auth = authMapper.selectOne(wrapper);
 
         //判断用户是否存在
@@ -469,7 +581,7 @@ public class AuthServiceImpl implements AuthService {
 
             //如果用户存在，更新接口调用凭证
             QueryWrapper<WxInfo> wxWrapper = new QueryWrapper<>();
-            wxWrapper.eq(openId != null, "openid", openId);
+            wxWrapper.eq(openId != null, "openid", openId.toString());
             WxInfo wxInfo = wxInfoMapper.selectOne(wxWrapper);
             if (wxInfo != null) {
                 wxInfo.setAccessToken(accessToken.toString());

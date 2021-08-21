@@ -11,9 +11,9 @@
         <module name="security-csrf" />
         <module name="mo-auth-service" />
         <module name="mo-user" />
+        <module name="mo-notify-service" />
         <module name="mo-gateway" />
         <module name="mo-common" />
-        <module name="mo-notify-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

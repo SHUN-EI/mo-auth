@@ -43,7 +43,7 @@ wx:
 wb:
   appid: 2522924994
   secret: 0da052749f90fd83b3c63cf9942f185f
-  redirect_uri: http://note.java.itcast.cn/
+  redirectUri: http://note.java.itcast.cn/
   authorizeUrl: https://api.weibo.com/oauth2/authorize
   accessTokenUrl: https://api.weibo.com/oauth2/access_token
   wbInfoUrl: https://api.weibo.com/2/users/show.json

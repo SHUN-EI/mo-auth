@@ -35,6 +35,15 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+
+    @ApiOperation("微博登陆/注册接口")
+    @PostMapping("/loginWB")
+    public Result loginWB(@RequestBody UserLoginRequest request) {
+
+        return authService.loginWB(request);
+
+    }
+
     @ApiOperation("根据id修改用户认证信息")
     @PostMapping("/updateAuth")
     public Result updateAuth(@RequestBody UserRegisterRequest request) {

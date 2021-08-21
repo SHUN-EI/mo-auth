@@ -47,4 +47,6 @@ public interface AuthService {
     Result pwdByEmail(UserLoginRequest request);
 
     Result updateAuth(UserRegisterRequest request);
+
+    Result loginWB(UserLoginRequest request);
 }

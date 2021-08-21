@@ -21,7 +21,7 @@
     //发起请求到后台服务，携带code
     $(function () {
         $.ajax({
-            url:'/login/wb',
+            url:'/api/auth/v1/loginWB',
             type:'POST',
             data:JSON.stringify({"code":code}),
             dataType:'json',
@@ -29,7 +29,7 @@
             //请求头，
             // 如果用户未登录，就进行登录，也可以理解为微博登录/注册
             // 如果用户已登录，请求头携带用户的authId，也可以理解为绑定微博
-            headers:{"authId":"1253553358925529089"},
+            headers:{"authId":"1423631171509407746"},
             success: function (res) {
                 $('#msg').html(res.msg);
                 $('#token').html(res.data);
