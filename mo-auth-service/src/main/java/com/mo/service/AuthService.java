@@ -49,4 +49,8 @@ public interface AuthService {
     Result updateAuth(UserRegisterRequest request);
 
     Result loginWB(UserLoginRequest request);
+
+    Result queryWbInfo(UserLoginRequest request);
+
+    Result refreshWbInfo(String authId);
 }

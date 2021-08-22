@@ -67,6 +67,82 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private WbInfoMapper wbInfoMapper;
 
+
+    /**
+     * 刷新用户微博个人信息(调用接口刷新)
+     * @param authId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result refreshWbInfo(String authId) {
+        //获取微博个人信息
+        WbInfo wbInfo = wbInfoMapper.selectById(authId);
+
+        //判断是否查询到结果
+        if (wbInfo == null) {
+            return Result.error("用户未绑定新浪微博");
+        }
+
+        //判断接口调用凭证access_token是否过期,减100秒，预留极限时间
+        Instant expire = wbInfo.getAccessTokenDate().toInstant().plusSeconds(wbInfo.getExpiresIn() - 100);
+
+        if (new Date().toInstant().compareTo(expire) > 0) {
+            //access_token过期时间达到后，access_token就失效了
+            return Result.error("新浪微博access_token接口调用凭证失效");
+        }
+
+        //调用接口查询微博个人信息
+        String url = wbConfig.getWbInfoUrl() +
+                "?access_token=" + wbInfo.getAccessToken() +
+                "&uid=" + wbInfo.getUid();
+
+        Map<String, Object> map = HttpUtil.sendGet(url);
+        Object idstr = map.get("idstr");
+
+        //判断是否查询到数据，接口调用是否成功
+        if (idstr == null || !wbInfo.getUid().equals(idstr.toString())) {
+            return Result.error("查询微博个人信息错误");
+        }
+
+        //保存获取到的微博个人信息
+        String screenName = map.get("screen_name").toString();
+        String location = map.get("location").toString();
+        String profileImageUrl = map.get("profile_image_url").toString();
+        String avatarHd = map.get("avatar_hd").toString();
+        String gender = map.get("gender").toString();
+        String lang = map.get("lang").toString();
+
+        wbInfo.setScreenName(screenName);
+        wbInfo.setLocation(location);
+        wbInfo.setProfileImageUrl(profileImageUrl);
+        wbInfo.setAvatarHd(avatarHd);
+        wbInfo.setGender(gender);
+        wbInfo.setLang(lang);
+        wbInfo.setUpdateDate(new Date());
+        wbInfoMapper.updateById(wbInfo);
+
+        return Result.success("获取最新微博个人信息成功", wbInfo);
+    }
+
+    /**
+     * 获取用户微博个人信息(直接查询数据库)
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public Result queryWbInfo(UserLoginRequest request) {
+        WbInfo wbInfo = wbInfoMapper.selectById(request.getAuthId());
+
+        if (wbInfo == null) {
+            return Result.error("用户未绑定新浪微博");
+        }
+
+        return Result.success("查询成功", wbInfo);
+
+    }
+
     /**
      * 微博登陆/注册接口
      *
