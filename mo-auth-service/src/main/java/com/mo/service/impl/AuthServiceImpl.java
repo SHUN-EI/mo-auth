@@ -69,7 +69,34 @@ public class AuthServiceImpl implements AuthService {
 
 
     /**
+     * 解绑新浪微博
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result unbindWb(UserLoginRequest request) {
+
+        Auth auth = authMapper.selectById(request.getAuthId());
+        if (auth == null) {
+            return Result.error("用户不存在");
+        }
+
+        //删除认证信息的微博唯一标识
+        auth.setWeibo(null);
+        auth.setWeiboBindDate(null);
+        authMapper.updateById(auth);
+
+        //删除微博个人信息数据
+        wbInfoMapper.deleteById(request.getAuthId());
+
+        return Result.success("解绑微博成功");
+    }
+
+    /**
      * 刷新用户微博个人信息(调用接口刷新)
+     *
      * @param authId
      * @return
      */

@@ -35,6 +35,12 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @ApiOperation("解绑新浪微博")
+    @PostMapping("/unbindWb")
+    public Result unbindWb(@RequestBody UserLoginRequest request){
+        return authService.unbindWb(request);
+    }
+
     @ApiOperation("刷新用户微博个人信息(调用接口刷新)")
     @GetMapping("/refreshWbInfo/{authId}")
     public Result refreshWbInfo(@PathVariable String authId) {
