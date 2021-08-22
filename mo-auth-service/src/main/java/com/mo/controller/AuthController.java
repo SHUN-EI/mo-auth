@@ -35,13 +35,22 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @ApiOperation("刷新用户微博个人信息(调用接口刷新)")
+    @GetMapping("/refreshWbInfo/{authId}")
+    public Result refreshWbInfo(@PathVariable String authId) {
+        return authService.refreshWbInfo(authId);
+    }
+
+    @ApiOperation("获取用户微博个人信息(直接查询数据库)")
+    @PostMapping("/queryWbInfo")
+    public Result queryWbInfo(@RequestBody UserLoginRequest request) {
+        return authService.queryWbInfo(request);
+    }
 
     @ApiOperation("微博登陆/注册接口")
     @PostMapping("/loginWB")
     public Result loginWB(@RequestBody UserLoginRequest request) {
-
         return authService.loginWB(request);
-
     }
 
     @ApiOperation("根据id修改用户认证信息")
