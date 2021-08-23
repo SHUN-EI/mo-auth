@@ -119,4 +119,43 @@ public class HttpUtil {
 
         return map;
     }
+
+    /**
+     * 发起get请求,返回字符串
+     * @param url
+     * @return
+     */
+    public static String sendGetStr(String url) {
+        //创建HttpClient
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse response = null;
+        String result = "";
+
+        try {
+            //创建get请求
+            HttpGet httpGet = new HttpGet(url);
+
+            //发送get请求
+            response = httpClient.execute(httpGet);
+
+            //解析结果
+            result = EntityUtils.toString(response.getEntity(), "utf-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //释放资源
+            try {
+                if (response != null) {
+                    response.close();
+                }
+                httpClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //返回数据
+        return result;
+    }
 }

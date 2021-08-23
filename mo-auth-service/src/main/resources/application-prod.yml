@@ -47,3 +47,11 @@ wb:
   authorizeUrl: https://api.weibo.com/oauth2/authorize
   accessTokenUrl: https://api.weibo.com/oauth2/access_token
   wbInfoUrl: https://api.weibo.com/2/users/show.json
+#QQ登录配置
+qq:
+  appid: 101859954
+  appKey: cd4643c94050a02d903d03c22c08dee9
+  redirectUri: http://auth.xuziyi.top/login/qq
+  accessTokenUrl: https://graph.qq.com/oauth2.0/token
+  openIdUrl: https://graph.qq.com/oauth2.0/me
+  qqInfoUrl: https://graph.qq.com/user/get_user_info
