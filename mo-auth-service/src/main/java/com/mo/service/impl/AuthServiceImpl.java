@@ -1,21 +1,25 @@
 package com.mo.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mo.aop.LoginRec;
+import com.mo.config.QQConfig;
 import com.mo.config.WBConfig;
 import com.mo.config.WXConfig;
 import com.mo.constant.CacheKey;
 import com.mo.dto.AuthDTO;
 import com.mo.entity.Auth;
+import com.mo.entity.QQInfo;
 import com.mo.entity.WbInfo;
 import com.mo.entity.WxInfo;
 import com.mo.enums.*;
 import com.mo.exception.BizException;
 import com.mo.mapper.AuthMapper;
+import com.mo.mapper.QQInfoMapper;
 import com.mo.mapper.WbInfoMapper;
 import com.mo.mapper.WxInfoMapper;
 import com.mo.model.Result;
@@ -66,7 +70,151 @@ public class AuthServiceImpl implements AuthService {
     private WBConfig wbConfig;
     @Autowired
     private WbInfoMapper wbInfoMapper;
+    @Autowired
+    private QQConfig qqConfig;
+    @Autowired
+    private QQInfoMapper qqInfoMapper;
 
+    /**
+     * QQ登录/注册接口
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result loginQQ(UserLoginRequest request) {
+        //根据code  获取 access_token
+        String url = qqConfig.getAccessTokenUrl() +
+                "?grant_type=authorization_code" +
+                "&client_id=" + qqConfig.getAppid() +
+                "&client_secret=" + qqConfig.getAppKey() +
+                "&code=" + request.getCode() +
+                "&redirect_uri=" + qqConfig.getRedirectUri();
+
+        Map<String, String> accessTokenMap = getQQAccessToken(url);
+        String accessToken = accessTokenMap.get("access_token");
+        String expiresIn = accessTokenMap.get("expires_in");
+        String refreshToken = accessTokenMap.get("refresh_token");
+
+        //判断结果是否为空
+        if (StringUtils.isBlank(accessToken)) {
+            return Result.error("QQ登录，获取access_token失败");
+        }
+
+        //根据access_token获取openid
+        String openid = null;
+        try {
+            String openidUrl = qqConfig.getOpenIdUrl() + "?access_token=" + accessToken;
+            String result = HttpUtil.sendGetStr(openidUrl);
+
+            //返回callback( {"client_id":"101859954","openid":"DEB0177D02FD329483BFC17FD66A52DA"} );
+            String openidJson = result.substring(result.indexOf("{"), result.indexOf("}") + 1);
+            openid = JSON.parseObject(openidJson).get("openid").toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //判断结果是否为空
+        if (StringUtils.isBlank(openid)) {
+            return Result.error("QQ登录，获取openid失败");
+        }
+
+        //根据openid查询用户信息是否存在
+        QueryWrapper<Auth> wrapper = new QueryWrapper<>();
+        wrapper.eq(openid != null, "qq", openid);
+        Auth auth = authMapper.selectOne(wrapper);
+
+        //判断查询结果是否不为空,用户已经绑定QQ
+        if (auth != null) {
+            //更新登录时间
+            authMapper.updateLastDate(request.getAuthId());
+
+            //更新接口调用凭证access_token
+            QueryWrapper<QQInfo> qqWrapper = new QueryWrapper<>();
+            qqWrapper.eq(openid != null, "openid", openid);
+            QQInfo qqInfo = qqInfoMapper.selectOne(qqWrapper);
+
+            if (qqInfo != null) {
+                qqInfo.setAccessToken(accessToken);
+                qqInfo.setAccessTokenDate(new Date());
+                qqInfo.setExpiresIn(Integer.parseInt(expiresIn));
+                qqInfo.setRefreshToken(refreshToken);
+                qqInfo.setUpdateDate(new Date());
+                qqInfoMapper.updateById(qqInfo);
+            }
+        } else {
+            //如果查询结果为空，表示用户第一次QQ登录
+            //判断authId是否不为空
+            if (StringUtils.isNotBlank(request.getAuthId())) {
+                //如果authId不为空，表示用户已经登录，绑定qq
+                auth = authMapper.selectById(request.getAuthId());
+                auth.setQq(openid);
+                auth.setQqBindDate(new Date());
+                auth.setLastDate(new Date());
+
+                authMapper.updateById(auth);
+
+            } else {
+                //如果authId为空，表示用户未登录，进行注册
+                auth = Auth.builder()
+                        .qq(openid)
+                        .qqBindDate(new Date())
+                        .status(1)
+                        .createDate(new Date())
+                        .lastDate(new Date())
+                        .build();
+
+                authMapper.insert(auth);
+            }
+
+            //保存用户的QQ个人信息
+            QQInfo qqInfo = QQInfo.builder()
+                    .authId(auth.getId())
+                    .openid(openid)
+                    .accessToken(accessToken)
+                    .accessTokenDate(new Date())
+                    .expiresIn(Integer.parseInt(expiresIn))
+                    .refreshToken(refreshToken)
+                    .createDate(new Date())
+                    .updateDate(new Date())
+                    .build();
+
+            qqInfoMapper.insert(qqInfo);
+        }
+
+        AuthDTO authDTO = new AuthDTO();
+        BeanUtils.copyProperties(auth, authDTO);
+
+        String token = JWTUtil.generateJsonWebToken(auth.getId());
+        authDTO.setToken(token);
+
+        //把token保存到redis中，用于注销功能
+        redisUtil.set(CacheKey.getJwtToken(auth.getId()), token, CacheKey.TOKENEXPIRETIME);
+
+        return Result.success("QQ登录成功", authDTO);
+    }
+
+    /**
+     * 解析QQAccessToken 的返回结果
+     *
+     * @param url
+     * @return
+     */
+    private Map<String, String> getQQAccessToken(String url) {
+        Map<String, String> map = new HashMap<>();
+        String result = HttpUtil.sendGetStr(url);
+
+        //access_token=A54A1A2F26D2CCA2849442D2274B3240&expires_in=7776000&refresh_token=E46A43A4FB5547BB1FB6C63C4656D331
+        String[] splitArr = result.split("&");
+        for (int i = 0; i < splitArr.length; i++) {
+            //access_token=A54A1A2F26D2CCA2849442D2274B324
+            String[] s = splitArr[i].split("=");
+            map.put(s[0], s[1]);
+        }
+        return map;
+
+    }
 
     /**
      * 解绑新浪微博

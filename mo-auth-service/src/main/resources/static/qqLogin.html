@@ -21,7 +21,7 @@
     //发起请求到后台服务，携带code
     $(function () {
         $.ajax({
-            url:'/login/qq',
+            url:'/api/auth/v1/loginQQ',
             type:'POST',
             data:JSON.stringify({"code":code}),
             dataType:'json',

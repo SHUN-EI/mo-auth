@@ -55,4 +55,6 @@ public interface AuthService {
     Result refreshWbInfo(String authId);
 
     Result unbindWb(UserLoginRequest request);
+
+    Result loginQQ(UserLoginRequest request);
 }

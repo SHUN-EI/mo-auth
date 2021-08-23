@@ -51,7 +51,7 @@ wb:
 qq:
   appid: 101859954
   appKey: cd4643c94050a02d903d03c22c08dee9
-  redirectUri: http://auth.xuziyi.top/login/qq
+  redirectUri: http://auth.xuziyi.top/qqLogin.html
   accessTokenUrl: https://graph.qq.com/oauth2.0/token
   openIdUrl: https://graph.qq.com/oauth2.0/me
   qqInfoUrl: https://graph.qq.com/user/get_user_info

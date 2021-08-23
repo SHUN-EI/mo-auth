@@ -35,9 +35,16 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+
+    @ApiOperation("QQ登录/注册接口")
+    @PostMapping("/loginQQ")
+    public Result loginQQ(@RequestBody UserLoginRequest request) {
+        return authService.loginQQ(request);
+    }
+
     @ApiOperation("解绑新浪微博")
     @PostMapping("/unbindWb")
-    public Result unbindWb(@RequestBody UserLoginRequest request){
+    public Result unbindWb(@RequestBody UserLoginRequest request) {
         return authService.unbindWb(request);
     }
 
