@@ -76,6 +76,32 @@ public class AuthServiceImpl implements AuthService {
     private QQInfoMapper qqInfoMapper;
 
     /**
+     * 解绑QQ
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result unbindQQ(UserLoginRequest request) {
+
+        Auth auth = authMapper.selectById(request.getAuthId());
+        if (auth == null) {
+            return Result.error("用户不存在");
+        }
+
+        //删除认证信息的QQ唯一标识
+        auth.setQq(null);
+        auth.setQqBindDate(null);
+        authMapper.updateById(auth);
+
+        //删除QQ个人信息数据
+        qqInfoMapper.deleteById(request.getAuthId());
+
+        return Result.success("解绑QQ成功");
+    }
+
+    /**
      * 刷新用户的QQ个人信息(调用QQ接口)
      *
      * @param authId

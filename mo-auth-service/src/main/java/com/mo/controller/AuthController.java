@@ -36,10 +36,17 @@ public class AuthController {
     private AuthService authService;
 
 
+    @ApiOperation("解绑QQ")
+    @PostMapping("/unbindQQ")
+    public Result unbindQQ(@RequestBody UserLoginRequest request) {
+        return authService.unbindQQ(request);
+    }
+
+
     @ApiOperation("刷新用户的QQ个人信息(调用QQ接口)")
     @GetMapping("/refreshQQInfo/{authId}")
     public Result refreshQQInfo(@PathVariable String authId) {
-        return  authService.refreshQQInfo(authId);
+        return authService.refreshQQInfo(authId);
     }
 
     @ApiOperation("查询用户的QQ个人信息(查询数据库)")
