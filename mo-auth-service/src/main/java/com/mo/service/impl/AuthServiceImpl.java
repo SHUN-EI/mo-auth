@@ -76,6 +76,94 @@ public class AuthServiceImpl implements AuthService {
     private QQInfoMapper qqInfoMapper;
 
     /**
+     * 刷新用户的QQ个人信息(调用QQ接口)
+     *
+     * @param authId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Override
+    public Result refreshQQInfo(String authId) {
+        //根据authId查询QQ个人信息
+        QQInfo qqInfo = qqInfoMapper.selectById(authId);
+
+        //判断QQ个人信息是否为空
+        if (qqInfo == null) {
+            return Result.error("用户未绑定QQ");
+        }
+
+        //判断接口调用凭证access_token是否过期,减100秒，预留极限时间
+        Instant expire = qqInfo.getAccessTokenDate().toInstant().plusSeconds(qqInfo.getExpiresIn() - 100);
+
+        if (new Date().toInstant().compareTo(expire) > 0) {
+            //如果过期，重新刷新
+            String url = qqConfig.getAccessTokenUrl() +
+                    "?grant_type=refresh_token" +
+                    "&client_id=" + qqConfig.getAppid() +
+                    "&client_secret=" + qqConfig.getAppKey() +
+                    "&refresh_token=" + qqInfo.getRefreshToken();
+
+            Map<String, String> accessTokenMap = getQQAccessToken(url);
+
+            //判断获取到的access_token是否存在
+            String accessToken = accessTokenMap.get("access_token");
+            String refreshToken = accessTokenMap.get("refresh_token");
+            String expiresIn = accessTokenMap.get("expires_in");
+            if (StringUtils.isBlank(accessToken)) {
+                return Result.error("QQ登录，获取access_token失败");
+            }
+
+            //设置接口调用凭证access_token
+            qqInfo.setAccessToken(accessToken);
+            qqInfo.setAccessTokenDate(new Date());
+            qqInfo.setRefreshToken(refreshToken);
+            qqInfo.setExpiresIn(Integer.parseInt(expiresIn));
+        }
+
+        //查询QQ个人信息
+        String infoUrl = qqConfig.getQqInfoUrl() +
+                "?access_token=" + qqInfo.getAccessToken() +
+                "&oauth_consumer_key=" + qqConfig.getAppid() +
+                "&openid=" + qqInfo.getOpenid();
+
+        Map<String, Object> resultMap = HttpUtil.sendGet(infoUrl);
+        Object nickname = resultMap.get("nickname");
+
+        //判断是否查询成功
+        if (nickname == null) {
+            return Result.error("查询QQ个人信息错误");
+        }
+
+        //保存查询到的QQ个人信息
+        qqInfo.setNickname(nickname.toString());
+        qqInfo.setGender(resultMap.get("gender").toString());
+        qqInfo.setProvince(resultMap.get("province").toString());
+        qqInfo.setCity(resultMap.get("city").toString());
+        qqInfo.setUpdateDate(new Date());
+
+        //返回结果
+        return Result.success("QQ个人信息查询成功", qqInfo);
+    }
+
+    /**
+     * 查询用户的QQ个人信息(查询数据库)
+     *
+     * @param authId
+     * @return
+     */
+    @Override
+    public Result queryQQInfo(String authId) {
+
+        QQInfo qqInfo = qqInfoMapper.selectById(authId);
+        if (qqInfo == null) {
+            return Result.error("用户未绑定QQ");
+        }
+
+        return Result.success("查询成功", qqInfo);
+    }
+
+
+    /**
      * QQ登录/注册接口
      *
      * @param request

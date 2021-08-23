@@ -36,6 +36,19 @@ public class AuthController {
     private AuthService authService;
 
 
+    @ApiOperation("刷新用户的QQ个人信息(调用QQ接口)")
+    @GetMapping("/refreshQQInfo/{authId}")
+    public Result refreshQQInfo(@PathVariable String authId) {
+        return  authService.refreshQQInfo(authId);
+    }
+
+    @ApiOperation("查询用户的QQ个人信息(查询数据库)")
+    @GetMapping("/queryQQInfo/{authId}")
+    public Result queryQQInfo(@PathVariable String authId) {
+        return authService.queryQQInfo(authId);
+    }
+
+
     @ApiOperation("QQ登录/注册接口")
     @PostMapping("/loginQQ")
     public Result loginQQ(@RequestBody UserLoginRequest request) {
